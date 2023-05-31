@@ -86,7 +86,7 @@ function old_getDif(indexes::Vector{Int}, arrayData::Vector{Float64}) #get diffe
     end
     sum_diff = @inbounds sum(arrayData[indexes[i]] - arrayData[indexes[i+1]] for i in 1:(arrLen-1))
     sum_diff += arrayData[indexes[end]]
-    return sum_diff
+    return sum_diff/length(indexes)
 end
 
 function getSTD(peakindxs::Vector{Int}, arrayData::Vector{Float64}, window_ratio::Float64) #get average standard deviation of fft peak indexes
@@ -111,13 +111,15 @@ end
 function CostFunction(Y::ODESolution)
     #get the fft of the solution
     fftData = getFrequencies(Y.u)
-    fftindexes = findmaxima(fftData,1)[1] #get the indexes of the peaks in the fft
+    fftindexes = findmaxima(fftData,10)[1] #get the indexes of the peaks in the fft
     timeindexes = findmaxima(Y.u,10)[1] #get the times of the peaks in the original solution
     if isempty(fftindexes) || length(timeindexes) < 2 #if there are no peaks, return 0
         return 0.0
     end
     std = getSTD(fftindexes, fftData, 0.001) #get the standard deviation of the peaks
+    println("Std: $std")
     diff = old_getDif(fftindexes, fftData) #get the difference between the peaks
-    println(diff)
+    println("Diff $diff")
     return std + diff
 end
+|
