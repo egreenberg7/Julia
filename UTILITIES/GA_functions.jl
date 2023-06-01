@@ -2,10 +2,6 @@
 
 abstract type ConstraintType end
 
-Base.iterate(C::ConstraintType, state=1) = state > length(fieldnames(typeof(C))) ? nothing : (getfield(C, state), state + 1)
-Base.length(C::ConstraintType) = length(fieldnames(typeof(C)))
-Base.eltype(::Type{<:ConstraintType}) = ConstraintRange
-
 """
     ConstraintRange
 
@@ -18,6 +14,7 @@ Struct for defining parameter ranges. Each instance contains a name, and a range
 """
 struct ConstraintRange
     name::String
+    symbol::Symbol
     min::Float64
     max::Float64
     nominal::Float64
@@ -29,7 +26,7 @@ end
 Struct encapsulating parameter constraints. Each field represents a different parameter, holding a `ConstraintRange` object that defines the valid range for that parameter.
 """
 mutable struct ParameterConstraints <: ConstraintType
-    ranges::Vector{Pair{Symbol,ConstraintRange}}
+    ranges::Vector{ConstraintRange}
 end
 
 """
@@ -37,8 +34,8 @@ end
 
 Struct encapsulating initial condition constraints. Each field represents a different initial condition, holding a `ConstraintRange` object that defines the valid range for that initial condition.
 """
-mutable struct InitialConditionConstraints <: ConstraintType
-    ranges::Vector{Pair{Symbol,ConstraintRange}}
+mutable struct InitialConditionConstraints <: ConstraintType 
+    ranges::Vector{ConstraintRange} 
 end
 #> END 
 
@@ -62,30 +59,31 @@ constraints = define_parameter_constraints(
 """
 function define_parameter_constraints(; karange = (-3.0, 1.0), kbrange = (-3.0, 3.0), kcatrange = (-3.0, 3.0), dfrange = (1.0, 5.0))
 
-    nominalvals = SVector(:ka1 => 0.009433439939827041, :kb1 => 2.3550169939427845, :kcat1 => 832.7213093872278, :ka2 => 12.993995997539924, :kb2 => 6.150972501791291,
-            :ka3 => 1.3481451097940793, :kb3 => 0.006201726090609513, :ka4 => 0.006277294665474662, :kb4 => 0.9250191811994848, :ka7 => 57.36471615394549, 
-            :kb7 => 0.04411989797898752, :kcat7 => 42.288085868394326, :DF => 3631.050539219606)
+    nominalvals = (;ka1 = 0.009433439939827041, kb1 = 2.3550169939427845, kcat1 = 832.7213093872278, ka2 = 12.993995997539924, kb2 = 6.150972501791291,
+            ka3 = 1.3481451097940793, kb3 = 0.006201726090609513, ka4 = 0.006277294665474662, kb4 = 0.9250191811994848, ka7 = 57.36471615394549, 
+            kb7 = 0.04411989797898752, kcat7 = 42.288085868394326, DF = 3631.050539219606)
     # Define parameter constraint ranges
     ka_min, ka_max = karange  # uM^-1s^-1, log scale
     kb_min, kb_max = kbrange  # s^-1, log scale
     kcat_min, kcat_max = kcatrange # s^-1, log scale
     df_min, df_max = dfrange # for DF, log scale
 
+
     return ParameterConstraints(
         [
-        :ka1 => ConstraintRange("ka1", ka_min, ka_max, nominalvals[1]),
-        :kb1 => ConstraintRange("kb1", kb_min, kb_max, nominalvals[2]),
-        :kcat1 => ConstraintRange("kcat1", kcat_min, kcat_max, nominalvals[3]),
-        :ka2 => ConstraintRange("ka2",ka_min, ka_max, nominalvals[4]),
-        :kb2 => ConstraintRange("kb2",kb_min, kb_max, nominalvals[5]),
-        :ka3 => ConstraintRange("ka3",ka_min, ka_max, nominalvals[6]),
-        :kb3 => ConstraintRange("kb3", kb_min, kb_max, nominalvals[7]),
-        :ka4 => ConstraintRange("ka4", ka_min, ka_max, nominalvals[8]),
-        :kb4 => ConstraintRange("kb4", kb_min, kb_max, nominalvals[9]),
-        :ka7 => ConstraintRange("ka7", ka_min, ka_max, nominalvals[10]),
-        :kb7 => ConstraintRange("kb7", kb_min, kb_max, nominalvals[11]),
-        :kcat7 => ConstraintRange("kcat7", kcat_min, kcat_max, nominalvals[12]),
-        :DF => ConstraintRange("DF", df_min, df_max, nominalvals[13])
+        ConstraintRange("ka1", :ka1, ka_min, ka_max, nominalvals[1]),
+        ConstraintRange("kb1", :kb1, kb_min, kb_max, nominalvals[2]),
+        ConstraintRange("kcat1", :kcat1, kcat_min, kcat_max, nominalvals[3]),
+        ConstraintRange("ka2", :ka2, ka_min, ka_max, nominalvals[4]),
+        ConstraintRange("kb2", :kb2, kb_min, kb_max, nominalvals[5]),
+        ConstraintRange("ka3", :ka3, ka_min, ka_max, nominalvals[6]),
+        ConstraintRange("kb3", :kb3, kb_min, kb_max, nominalvals[7]),
+        ConstraintRange("ka4", :ka4, ka_min, ka_max, nominalvals[8]),
+        ConstraintRange("kb4", :kb4, kb_min, kb_max, nominalvals[9]),
+        ConstraintRange("ka7", :ka7, ka_min, ka_max, nominalvals[10]),
+        ConstraintRange("kb7", :kb7, kb_min, kb_max, nominalvals[11]),
+        ConstraintRange("kcat7", :kcat7, kcat_min, kcat_max, nominalvals[12]),
+        ConstraintRange("DF", :DF, df_min, df_max, nominalvals[13])
         ]
     )
 end
@@ -106,8 +104,9 @@ constraints = define_initialcondition_constraints(
 )
 ```
 """
-function define_initialcondition_constraints(;lipidrange = (0.1, 10.0), kinaserange = (0.1, 10.0), phosphataserange = (0.1, 10.0), ap2range = (0.1, 10.0))
-    nominalvals = SVector(:L => 3.0, :K => 0.5, :P => 0.3, :A => 2.0)
+function define_initialcondition_constraints(;lipidrange = (0.1, 10.0), kinaserange = (0.1, 5.0), phosphataserange = (0.1, 5.0), ap2range = (0.1, 10.0))
+
+    nominalvals = (;L = 3.0, K = 0.5, P = 0.3, A = 2.0)
     # Define parameter constraint ranges
     lipid_min, lipid_max = lipidrange  # uM
     kinase_min, kinase_max = kinaserange  # uM
@@ -116,16 +115,16 @@ function define_initialcondition_constraints(;lipidrange = (0.1, 10.0), kinasera
 
     return InitialConditionConstraints(
         [
-        :L => ConstraintRange("PIP+PIP2", lipid_min, lipid_max, nominalvals[1]),
-        :K => ConstraintRange("Kinase", kinase_min, kinase_max, nominalvals[2]),
-        :P => ConstraintRange("Phosphatase", phosphatase_min, phosphatase_max, nominalvals[3]),
-        :A => ConstraintRange("AP2", ap2_min, ap2_max, nominalvals[4])
+        ConstraintRange("PIP+PIP2", :L, lipid_min, lipid_max, nominalvals[1]),
+        ConstraintRange("Kinase", :K, kinase_min, kinase_max, nominalvals[2]),
+        ConstraintRange("Phosphatase", :P, phosphatase_min, phosphatase_max, nominalvals[3]),
+        ConstraintRange("AP2", :A, ap2_min, ap2_max, nominalvals[4])
         ]
     )
 end
 #> END
 
-
+# @code_warntype define_initialcondition_constraints()
 
 
 #< GA PROBLEM TYPE
@@ -145,10 +144,16 @@ struct GAProblem{T <: ConstraintType}
     ode_problem::ODEProblem
     eval_function::Function
 
-    function GAProblem(constraints::T, ode_problem::ODEProblem) where T <: ConstraintType
-        evalfunc = T <: ParameterConstraints ? eval_param_fitness : eval_ic_fitness
+    function GAProblem(constraints::ParameterConstraints, ode_problem::ODEProblem) 
+        # evalfunc = T === ParameterConstraints ? eval_param_fitness : eval_ic_fitness
         # fitness_function = fitness_function_maker(evalfunc, ode_problem)
-        new{T}(constraints, ode_problem, evalfunc)
+        new{ParameterConstraints}(constraints, ode_problem, eval_param_fitness)
+    end
+
+    function GAProblem(constraints::InitialConditionConstraints, ode_problem::ODEProblem) 
+        # evalfunc = T === ParameterConstraints ? eval_param_fitness : eval_ic_fitness
+        # fitness_function = fitness_function_maker(evalfunc, ode_problem)
+        new{InitialConditionConstraints}(constraints, ode_problem, eval_ic_fitness)
     end
 end
 
@@ -177,7 +182,7 @@ population = generate_population(constraints, 100)
 ```
 """
 function generate_population(constraint::ParameterConstraints, n::Int)
-    population = [exp10.(rand(Uniform(param.min, param.max), n)) for param in constraint]
+    population = [exp10.(rand(Uniform(conrange.min, conrange.max), n)) for conrange in constraint.ranges]
     population = transpose(hcat(population...))
     return [population[:, i] for i in 1:n]
 end
@@ -194,7 +199,14 @@ population = generate_population(constraints, 100)
 ```
 """
 function generate_population(constraint::InitialConditionConstraints, n::Int)
-    population = [rand(Uniform(param.min, param.max), n) for param in constraint]
+    population = [rand(Uniform(conrange.min, conrange.max), n) for conrange in constraint.ranges]
+    population = transpose(hcat(population...))
+    return [population[:, i] for i in 1:n]
+end
+
+"""For calculating volume"""
+function generate_population(constraint::Vector{ConstraintRange}, n::Int)
+    population = [rand(Uniform(conrange.min, conrange.max), n) for conrange in constraint]
     population = transpose(hcat(population...))
     return [population[:, i] for i in 1:n]
 end
@@ -212,24 +224,42 @@ function make_fitness_function(evalfunc::Function, prob::ODEProblem)
 end
 #> END
 
+function ga_callback(trace::Evolutionary.OptimizationTrace, progressbar::Progress, threshold::Int)
+    #? Callback function for the GA, updating the progress bar
+    num_oscillation = trace[end].metadata["num_oscillatory"]
+    if num_oscillation >= threshold 
+        finish!(progressbar)
+        return true
+    else
+        next!(progressbar, step = num_oscillation)
+        return false
+    end
+end
+
 
 #< RUN GENETIC ALGORITHM OPTIMIZATION ##
 """
 Runs the genetic algorithm, returning the `result`, and the `record` named tuple
 """
-function run_GA(ga_problem::GAProblem, fitnessfunction_factory::Function=make_fitness_function; population_size = 10000, abstol=1e-12, reltol=1e-10, successive_f_tol = 5, iterations=10, parallelization = :thread)
+function run_GA(ga_problem::GAProblem, fitnessfunction_factory::Function=make_fitness_function; threshold=10000, population_size = 10000, abstol=1e-12, reltol=1e-10, successive_f_tol = 1, iterations=10, parallelization = :thread)
     # Generate the initial population.
     pop = generate_population(ga_problem.constraints, population_size)
+    # @info "Generated initial population"
 
     # Create constraints using the min and max values from param_values.
-    boxconstraints = BoxConstraints([constraint.min for constraint in ga_problem.constraints], [constraint.max for constraint in ga_problem.constraints])
+    boxconstraints = BoxConstraints([constraint.min for constraint in ga_problem.constraints.ranges], [constraint.max for constraint in ga_problem.constraints.ranges])
+    # @info "Created box constraints"
+
+    # Create Progress bar and callback function
+    ga_progress = Progress(threshold; desc = "GA Progress")
+    callback_func = (trace) -> ga_callback(trace, ga_progress, threshold)
 
     # Define options for the GA.
     opts = Evolutionary.Options(abstol=abstol, reltol=reltol, successive_f_tol = successive_f_tol, iterations=iterations, 
-                        store_trace = true, show_trace=true, show_every=1, parallelization=parallelization)
+                        store_trace = true, show_trace=true, show_every=1, parallelization=parallelization, callback=callback_func)
 
     # Define the range of possible values for each parameter.
-    mutation_scalar = 0.5; mutation_range = fill(mutation_scalar, length(ga_problem.constraints))
+    mutation_scalar = 0.5; mutation_range = fill(mutation_scalar, length(ga_problem.constraints.ranges))
 
     # Define the GA method.
     mthd = GA(populationSize = population_size, selection = tournament(Int(population_size/10)),
@@ -239,14 +269,17 @@ function run_GA(ga_problem::GAProblem, fitnessfunction_factory::Function=make_fi
     # Make fitness function
     # @code_warntype fitnessfunction_factory(ga_problem.eval_function, ga_problem.ode_problem)
     fitness_function = fitnessfunction_factory(ga_problem.eval_function, ga_problem.ode_problem)
+    # @info "Created fitness function"
 
     # Run the optimization.
+    # @info "Starting optimization"
     result = Evolutionary.optimize(fitness_function, boxconstraints, mthd, pop, opts)
-
+    # @info "Finished optimization"
+    # return result
     # Get the individual, fitness, and extradata of the population
-    record = reduce(vcat,[gen.metadata["staterecord"] for gen in result.trace])
-    
-    return record, result
+    record::Vector{NamedTuple{(:ind,:fit,:per,:amp),Tuple{Vector,Float64, Float64, Float64}}} = reduce(vcat,[gen.metadata["staterecord"] for gen in result.trace])
+    return record
+    # return record, result
 end
 #> END
 
@@ -255,8 +288,7 @@ end
 
 
 
-
-#< MISCALAENOUS FUNCTIONS ##
+#< MISCELLANEOUS FUNCTIONS ##
 """Find the indices of the inputs in a `NAME` array"""
 function find_indices(combination::Vector{String}, NAMES::Vector{String})
     p1idx = findfirst(isequal(combination[1]), NAMES)
@@ -273,8 +305,8 @@ function find_indices(combination::Vector{Symbol}, NAMES::Vector{String})
 end
 
 function find_indices(combination::Vector{ConstraintRange}, constraints::Vector{ConstraintRange})
-    p1idx = findfirst(isequal(combination[1]), constraints)
-    p2idx = findfirst(isequal(combination[2]), constraints)
+    p1idx = findfirst(x -> x.name == combination[1].name, constraints)
+    p2idx = findfirst(x -> x.name == combination[2].name, constraints)
     return p1idx, p2idx
 end
 #> END
