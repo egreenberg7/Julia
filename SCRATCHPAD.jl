@@ -50,13 +50,13 @@ for n in testype1
 end
 
 
-#<Costfunction testing
+#< Costfunction testing
 function old_getDif(indexes::Vector{Int}, arrayData::Vector{Float64}) #get difference between fft peak indexes
     #=
     :param indexes: the indexes of the peaks in the Fourier transform of a solution
     :param arrayData: the normalized absolute values of the rfft of a solution
     =#
-    arrLen = lengt h(indexes)
+    arrLen = length(indexes)
     if arrLen < 2
         return 0.0 #? If there is only one peak, the score is set to 0. May not be necessary
     end
