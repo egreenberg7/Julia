@@ -82,14 +82,12 @@ const tspan = (0., 100.)
 #solve the reduced ODEs
 const prob = ODEProblem(fullrn, u0, tspan, p)
 sol = solve(prob, Rosenbrock23(), saveat=0.1, save_idxs=1) #solve adaptively
-fftPlot(sol)
-
 
 """
 Takes array of all initial concentrations (u0) and updates the initial concentrations that can be changed
-`curConcentrations` Array of all initial concetrations as currently set (u0)
-`newConcentrations` Array of new desired initial concentrations [L/Lp K P A]
-`isLp` Boolean, true if Lp in newConcentrations, false if L in newConcentrations
+- `curConcentrations` Array of all initial concetrations as currently set (u0)
+- `newConcentrations` Array of new desired initial concentrations [L/Lp K P A]
+- `isLp` Boolean, true if Lp in newConcentrations, false if L in newConcentrations
 """
 function changeInitialConcentration(curConcentrations::Vector{Float64}, newConcentrations::Vector{Float64},isLp::Bool)
     if isLp
@@ -101,6 +99,65 @@ function changeInitialConcentration(curConcentrations::Vector{Float64}, newConce
     curConcentrations[4] = newConcentrations[3]
     curConcentrations[5] = newConcentrations[4]
 end
+
+function old_getDif(indexes::Vector{Int}, arrayData::Vector{Float64}) #get difference between fft peak indexes
+    #=
+    :param indexes: the indexes of the peaks in the Fourier transform of a solution
+    :param arrayData: the normalized absolute values of the rfft of a solution
+    =#
+    arrLen = length(indexes)
+    if arrLen < 2
+        return 0.0 #? If there is only one peak, the score is set to 0. May not be necessary
+    end
+    println("The first peak is $(arrayData[indexes[1]])")
+    sum_diff = @inbounds sum(arrayData[indexes[i]] - arrayData[indexes[i+1]] for i in 1:(arrLen-1)) #? This is the negative of what is in the original paper
+    sum_diff += arrayData[indexes[end]] #? The original paper also did not have a term just adding the one thing that was never added
+    return sum_diff #/ length(indexes)
+end
+
+function getFrequencies(y::Vector{Float64})
+    res = abs.(rfft(y))
+    return res ./ cld(length(y), 2) #normalize amplitudes
+    #? That length is defined to be half the length +1 of the input of the data set.
+    #? Instead,
+end
+
+"""
+For each peak found in the Fourier transform, calculates the standard deviation of the height of the peak 
+and the data points one index above and below. The standard deviations are then summed and divided by the number of peaks
+in the Fourier transform. This is equivalent to the first term of the cost function in equation 4 of Pušnik et al. Very 
+narrow and tall peaks in the Fourier transform are hence rewarded in the final cost function.
+- `peakindxs` the indexes of the peaks in the Fourier transform of a solution
+- `arrayData` the normalized absolute values of the rfft of a solution
+"""
+function getSTD(peakindxs::Vector{Int}, arrayData::Vector{Float64})
+    #Note: I got rid of the calculating of the window and just set the window size to three.
+    sum_std = @inbounds sum(std(arrayData[max(1, ind - 1):min(length(arrayData), ind + 1)]) for ind in peakindxs)
+    return sum_std / length(peakindxs)
+end
+
+function CostFunction(Y::ODESolution)
+    #get the fft of the solution
+    fftData = getFrequencies(Y.u)
+    fftindexes = findmaxima(fftData,10)[1] #get the indexes of the peaks in the fft
+    timeindexes = findmaxima(Y.u,10)[1] #get the times of the peaks in the original solution
+    if isempty(fftindexes) || length(timeindexes) < 2 #if there are no peaks, return 0
+        return 0.0
+    end
+    std = getSTD(fftindexes, fftData) #get the standard deviation of the peaks
+    println("Std: $std")
+    diff = old_getDif(fftindexes, fftData) #get the difference between the peaks
+    println("Diff $diff")
+    return std + diff
+end
+
+#timespan for integration
+const tspan = (0., 100.)
+#solve the reduced ODEs
+const prob = ODEProblem(fullrn, u0, tspan, p)
+sol = solve(prob, Rosenbrock23(), saveat=0.1, save_idxs=1) #solve adaptively
+fftPlot(sol)
+CostFunction(sol)
 
 dampedConcentrations = Vector{Float64}([10^0.5508305830906121, 10^0.4880537201023163, 0.6083519943817587, 10^1.4822439628752706])
 changeInitialConcentration(u0,dampedConcentrations,true)
