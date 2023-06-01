@@ -78,25 +78,30 @@ end
     Plots.plot((2:length(sol.t)),(abs.(fft(sol.u[2:end]))))
 
 
-## Genetic algorithm to find the best parameters for the reduced model ## 
-function old_getDif(indexes::Vector{Int}, arrayData::Vector{Float64}) #get difference between fft peak indexes
-    arrLen = length(indexes)
-    if arrLen < 2
-        return 0.0
-    end
-    sum_diff = @inbounds sum(arrayData[indexes[i]] - arrayData[indexes[i+1]] for i in 1:(arrLen-1))
-    sum_diff += arrayData[indexes[end]]
-    return sum_diff/length(indexes)
+## Genetic algorithm to find the best parameters for the reduced model ##
+"""
+For each peak found in the Fourier transform, calculates the difference in peak heights between itself and the previous peak 
+(with the exception of the first peak). These differences are then summed. This is actually a telescoping series, which
+simplifies to the height of the last peak minus the first peak.
+- `peakindxs` the indexes of the peaks in the Fourier transform of a solution
+- `arrayData` the normalized absolute values of the rfft of a solution
+"""
+function old_getDif(peakindxs::Vector{Int}, arrayData::Vector{Float64}) #get difference between fft peak indexes
+    return (-arrayData[peakindxs[1]]+arrayData[peakindxs[end]]) /length(peakindxs) 
+    #This is what they did in the paper besides the /length (last-first). What Jonathan was doing was just taking the height of the first peak!
 end
 
-function getSTD(peakindxs::Vector{Int}, arrayData::Vector{Float64}, window_ratio::Float64) #get average standard deviation of fft peak indexes
-    #=
-
-    :param peakindxs: the indexes of the peaks in the Fourier transform of a solution
-    :param arrayData: the normalized absolute values of the rfft of a solution
-    =#
-    window = max(1, round(Int, window_ratio * length(arrayData)))
-    sum_std = @inbounds sum(std(arrayData[max(1, ind - window):min(length(arrayData), ind + window)]) for ind in peakindxs)
+"""
+For each peak found in the Fourier transform, calculates the standard deviation of the height of the peak 
+and the data points one index above and below. The standard deviations are then summed and divided by the number of peaks
+in the Fourier transform. This is equivalent to the first term of the cost function in equation 4 of Pušnik et al. Very 
+narrow and tall peaks in the Fourier transform are hence rewarded in the final cost function.
+- `peakindxs` the indexes of the peaks in the Fourier transform of a solution
+- `arrayData` the normalized absolute values of the rfft of a solution
+"""
+function getSTD(peakindxs::Vector{Int}, arrayData::Vector{Float64})
+    #Note: I got rid of the calculating of the window and just set the window size to three.
+    sum_std = @inbounds sum(std(arrayData[max(1, ind - 1):min(length(arrayData), ind + 1)]) for ind in peakindxs)
     return sum_std / length(peakindxs)
 end
 
