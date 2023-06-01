@@ -72,7 +72,7 @@ const tspan = (0., 100.)
 #solve the reduced ODEs
 const prob = ODEProblem(fullrn, u0, tspan, p)
 sol = solve(prob, saveat=0.1, save_idxs=1) #solve adaptively
-Plots.plot(sol)
+
 
 
 
@@ -265,7 +265,7 @@ end
 colorBarPlot = scatter([0,0], [0,1], zcolor=[0,3], clims=(0,0.42), xlims=(1,1.1), label="", colorbar_title="Normalized Amplitude", framestyle=:none)
 subplotDim = fill(25*Plots.mm,(9,1))
 l = @layout [grid(3, 3) a{0.1w}]
-allPlots = [subplots[:,10:end] colorBarPlot]
+allPlots = [subplots[:,1:end] colorBarPlot]
 plot(allPlots..., layout = l, size = (600,600))
 #=
 Plots.plot(subplots..., layout=grid(3,3), colorbar =:none,xaxis=(rotation=-15,guidefonthalign=:hcenter), yaxis=(rotation=40),
