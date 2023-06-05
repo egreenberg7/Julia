@@ -4,21 +4,22 @@
     - `T` is the type of the fitness value\n
     - `IT` is the type of the individual\n
     - `TT` is the type of the additional data from the objective function\n"""
-mutable struct CustomGAState{IT,TT} <: Evolutionary.AbstractOptimizerState  
-    N::Int  
+mutable struct CustomGAState <: Evolutionary.AbstractOptimizerState  
+    const N::Int  
     eliteSize::Int  
     fitness::Float64  
     fitpop::Vector{Float64}  
-    extradata::Vector{TT}
-    fittest::IT  
+    extradata::Vector{Vector{Float64}}
+    fittest::Vector{Float64}  
 end  
 Evolutionary.value(s::CustomGAState) = s.fitness #return the fitness of the fittest individual
 Evolutionary.minimizer(s::CustomGAState) = s.fittest #return the fittest individual
 
 """Trace override function"""
 function Evolutionary.trace!(record::Dict{String,Any}, objfun, state, population::Vector{Vector{Float64}}, method::GA, options) 
-    @info "My trace override function called"
-    record["staterecord"] = [(ind=population[i], fit=state.fitpop[i], per=state.extradata[i][1], amp=state.extradata[i][2]) for i in eachindex(population)]
+    oscillatory_population_idxs = findall(fit -> fit < -0.1, state.fitpop) #find the indices of the oscillatory individuals
+    record["staterecord"] = [(ind=population[i], fit=state.fitpop[i], per=state.extradata[i][1], amp=state.extradata[i][2]) for i in oscillatory_population_idxs]
+    record["num_oscillatory"] = length(oscillatory_population_idxs)
 end
 
 function Evolutionary.trace!(record::Dict{String,Any}, objfun, state, population, method::GA, options)
@@ -41,18 +42,20 @@ end
 
 
 """Modified value! function from Evolutionary.jl to allow for multiple outputs from the objective function to be stored"""
-function Evolutionary.value!(obj::EvolutionaryObjective{TC,TF,TX,Val{:thread}},
+function Evolutionary.NLSolversBase.value!(obj::EvolutionaryObjective{TC,TF,TX,Val{:thread}},
                                 F::AbstractVector, E::AbstractVector, xs::AbstractVector{TX}) where {TC,TF<:AbstractVector,TX}
     n = length(xs)
+    # @info "Evaluating $(n) individuals in parallel"
     Threads.@threads for i in 1:n
         F[i], E[i]... = Evolutionary.value(obj, xs[i])  # get the vector
     end
     F, E
 end
 
-function Evolutionary.value!(obj::EvolutionaryObjective{TC,TF,TX,Val{:serial}},
+function Evolutionary.NLSolversBase.value!(obj::EvolutionaryObjective{TC,TF,TX,Val{:serial}},
                                 F::AbstractVector, E::AbstractVector, xs::AbstractVector{TX}) where {TC,TF<:AbstractVector,TX}
     n = length(xs)
+    # @info "Evaluating $(n) individuals in serial"
     for i in 1:n
         F[i], E[i]... = Evolutionary.value(obj, xs[i])  # get the vector
     end
@@ -78,7 +81,7 @@ function Evolutionary.initial_state(method::GA, options, objfun, population)
     eliteSize = isa(method.ɛ, Int) ? method.ɛ : round(Int, method.ɛ * method.populationSize)
 
     # Evaluate population fitness, extradata (period and amplitude)
-    for i in eachindex(population)
+    Threads.@threads for i in eachindex(population)
         fitness[i], extradata[i]... = Evolutionary.value(objfun, population[i])
     end
     minfit, fitidx = findmin(fitness)
@@ -111,7 +114,9 @@ function Evolutionary.update_state!(objfun, constraints, state::CustomGAState, p
     Evolutionary.mutate!(offspring, method, constraints, rng=rng)
 
     # calculate fitness and extradata of the population
+    # @info "Evaluating offspring in update_state!"
     Evolutionary.evaluate!(objfun, state.fitpop, state.extradata, offspring, constraints)
+    # @info "Finished evaluating offspring in update_state!"
 
     # select the best individual
     minfit, fitidx = findmin(state.fitpop)
