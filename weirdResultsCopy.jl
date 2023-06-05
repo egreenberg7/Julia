@@ -171,3 +171,9 @@ fftPlot(falseSol)
 falsefftData = abs.(rfft(falseSol.u))
 peakIndices,peakVals = findmaxima(falsefftData,20)
 std(falsefftData[40:42])
+
+
+longPeriodMaybe = [0.028897672047985618, 0.01380748668456112, 0.012661484599261115, 86.61647283882108]
+changeInitialConcentration(u0, longPeriodMaybe, true)
+longSol = solve(remake(prob, u0=u0, tspan = (0.,5000.)),Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+fftPlot(longSol)
