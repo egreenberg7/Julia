@@ -31,12 +31,19 @@
 #     Vmax7*DF*Lp/(Km7+Lp), Lp + LpAP --> L + LpAP # 2D reaction: Membrane-bound phosphatase binds to Lp with greater affinity as determined by y (V/A) using Michaelis-Menten
 # end
 
-"""Michaelis-Menten approximation of the original oscillator model, without all possible pairs of reactions"""
+"""
+CORRECTION:
+
+Michaelis-Menten approximation of the original oscillator model, without all possible pairs of reactions
+Note that V_max=kcat*E. Because the velocity of the reaction is given by V_max[S]/(Km+S),
+we can rewrite this as kcat*E*S/(Km+S), and in the code for the rate equations,
+we then remove E*S since this is filled in when our equation is interpreted as a typical rate equation.
+"""
 mm_rn = @reaction_network mm_rn begin
     @parameters kcat1 Km1 ka2 kb2 ka3 kb3 ka4 kb4 kcat7 Km7 DF
     @species L(t) K(t) P(t) A(t) Lp(t) LpA(t) LpAK(t) LpAP(t) 
 
-    (kcat1*K)*L/(Km1+L), L + K --> Lp + K # L phosphorylation by kinase into Lp using Michaelis-Menten
+    kcat1*K(0)/(K*(Km1+L)), L + K --> Lp + K # L phosphorylation by kinase into Lp using Michaelis-Menten
     (ka2,kb2), Lp + A <--> LpA # Lp binding to AP2 adaptor
     (ka3,kb3), LpA + K <--> LpAK # Membrane-bound adaptor binding to kinase
     (kcat1*K*DF)*L/(Km1+L), LpAK + L --> Lp + LpAK # 2D reaction: Membrane-bound kinase binds to L with greater affinity as determined by y (V/A) using Michaelis-Menten
@@ -44,3 +51,20 @@ mm_rn = @reaction_network mm_rn begin
     (ka4,kb4), LpA + P <--> LpAP # Membrane-bound adaptor binding to phosphatase 
     (kcat7*P*DF)*Lp/(Km7+Lp), Lp + LpAP --> L + LpAP # 2D reaction: Membrane-bound phosphatase binds to Lp with greater affinity as determined by y (V/A) using Michaelis-Menten
 end
+
+p = rand(11)
+u = rand(8)
+tspan = (0,100)
+using DifferentialEquations
+mmprob = ODEProblem(mm_rn,u,tspan,p)
+x = convert(ODESystem, mm_rn)
+for i in x.eqs println(i) end
+
+one_rn = @reaction_network one_rn begin
+    @parameters kcat1 Km1
+    @species L(t) K(t)
+
+    kcat1*(K)/(K*(Km1+L)), L + K --> Lp + K # L phosphorylation by kinase into Lp using Michaelis-Menten
+end
+test = convert(ODESystem, one_rn)
+for i in test.eqs println(i) end
