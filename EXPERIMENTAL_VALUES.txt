@@ -1,5 +1,17 @@
+P-core data from Höning
+https://doi.org/10.1016/j.molcel.2005.04.019 
 PIP2 + AP2 <=> 
     ka2: 0.7e-3 uM^-1 s^-1
     kb2: 2.0e-3 s^-1 
     Kd: 2.9 uM 
 
+PIP5K1C Michaelis Mentin data
+DOI: 10.1074/jbc.M112.370155
+This paper uses effective concentration of PIP5K at the surface
+to make its calculations, as described in https://doi.org/10.1002/jcb.21027
+
+Synaptojanin 1 in people
+DOI: 10.7554/eLife.64922
+diC8-PI(4,5)P2 is what is of interest I think, with Mg2+ and no mutants
+kcat=85.3 s^-1
+KM=39 uM
