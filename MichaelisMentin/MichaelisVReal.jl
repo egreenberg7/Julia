@@ -53,11 +53,11 @@ fullrn = @reaction_network fullrn begin
     kcat7, APLp --> L + AP #dephosphorylation of lipid
 end
 
-#parameter list
+#parameter list Changed this around
 """ka1, kb1, kcat1, ka2, kb2, ka3, kb3, ka4, kb4, ka7, kb7, kcat7, y"""
-psym = [:ka1 => 0.009433439939827041, :kb1 => 2.3550169939427845, :kcat1 => 832.7213093872278, :ka2 => 12.993995997539924, :kb2 => 6.150972501791291,
+psym = [:ka1 => 2.009433439939827041, :kb1 => 2.3550169939427845, :kcat1 => 832.7213093872278, :ka2 => 12.993995997539924, :kb2 => 6.150972501791291,
         :ka3 => 1.3481451097940793, :kb3 => 0.006201726090609513, :ka4 => 0.006277294665474662, :kb4 => 0.9250191811994848, :ka7 => 57.36471615394549, 
-        :kb7 => 0.04411989797898752, :kcat7 => 42.288085868394326, :y => 3631.050539219606]
+        :kb7 => 50.04411989797898752, :kcat7 => 42.288085868394326, :y => 3631.050539219606]
 p = [x[2] for x in psym]
     
 #initial condition list
@@ -89,7 +89,7 @@ function findMMParams(fullParams::Vector{Float64})
     mmParams[2] = sum(fullParams[2:3]) / fullParams[1] #Km1 = (kb1 + kcat) / ka1
     mmParams[3:8] = fullParams[4:9] #ka2,kb2,ka3,kb3,ka4,kb4
     mmParams[9] = fullParams[12] #kcat7
-    mmParams[10] = sum(fullParams[11:12]) / mmParams[10] #Km7 = (kb7+kcat7) / ka7
+    mmParams[10] = sum(fullParams[11:12]) / fullParams[10] #Km7 = (kb7+kcat7) / ka7
     mmParams[11] = fullParams[13] #df
     return mmParams
 end
@@ -115,4 +115,29 @@ const mmProb = ODEProblem(mm_rn, mmu0, tspan, mmp)
 fullsol = solve(fullProb, saveat=0.1, save_idxs=1)
 mmsol = solve(mmProb, saveat=0.1, save_idxs=1)
 a,b = plot(fullsol), plot(mmsol)
-plot(a,b)
+#plot(a,b)
+
+#I changed the ranges of concentrations to try to meet the
+#substrate concentration assumption.
+#TODO Fix 2D Michaelis Menten approximation since the assumptions are not met when the enzyme concentration is variable even if it is low.
+numIterations = 100
+for i in 1:numIterations
+    u0[1] = rand(Random.seed!(4 * numIterations + i),Distributions.LogUniform(1, 100)) #L
+    u0[2] = rand(Random.seed!(i),Distributions.LogUniform(1, 100)) #Lp
+    u0[3] = rand(Random.seed!(numIterations + i),Distributions.LogUniform(0.001, 0.1)) #K
+    u0[4] = rand(Random.seed!(2 * numIterations + i),Distributions.LogUniform(0.01, 0.1)) #P
+    u0[5] = rand(Random.seed!(3 * numIterations + i),Distributions.LogUniform(0.001, 0.1)) #A
+    mmu0 = findMMConc(u0)
+    currentFullSol = solve(remake(fullProb, u0=u0), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+    currentMMSol = solve(remake(mmProb, u0=mmu0), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+    name = "L=$(u0[1]) Lp=$(u0[2]) K=$(u0[3]) P=$(u0[4]) A=$(u0[5]).png"
+    fullSolPlot = plot(currentFullSol, title="Full Reaction")
+    mmSolPlot = plot(currentMMSol, title="MM Reaction")
+    plot(fullSolPlot,mmSolPlot, layout=(2,1))
+    savefig("~/mmTest/$name")
+end
+
+mm_eqs = convert(ODESystem, mm_rn)
+txt = latexify(mm_eqs)
+print(txt)
+render(txt)
