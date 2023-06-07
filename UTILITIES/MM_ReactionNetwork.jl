@@ -43,13 +43,13 @@ mm_rn = @reaction_network mm_rn begin
     @parameters kcat1 Km1 ka2 kb2 ka3 kb3 ka4 kb4 kcat7 Km7 DF
     @species L(t) K(t) P(t) A(t) Lp(t) LpA(t) LpAK(t) LpAP(t) 
 
-    kcat1*K(0)/(K*(Km1+L)), L + K --> Lp + K # L phosphorylation by kinase into Lp using Michaelis-Menten
+    kcat1*(K + LpAK)/(K*(Km1+L)), L + K --> Lp + K # L phosphorylation by kinase into Lp using Michaelis-Menten
     (ka2,kb2), Lp + A <--> LpA # Lp binding to AP2 adaptor
     (ka3,kb3), LpA + K <--> LpAK # Membrane-bound adaptor binding to kinase
-    (kcat1*K*DF)*L/(Km1+L), LpAK + L --> Lp + LpAK # 2D reaction: Membrane-bound kinase binds to L with greater affinity as determined by y (V/A) using Michaelis-Menten
-    (kcat7*P)*Lp/(Km7+Lp), Lp + P --> L + P # Lp dephosphorylation by phosphatase using Michaelis-Menten
+    (kcat1*(K + LpAK) * DF)/(LpAK*(Km1+L)), LpAK + L --> Lp + LpAK # 2D reaction: Membrane-bound kinase binds to L with greater affinity as determined by y (V/A) using Michaelis-Menten
+    (kcat7*(P+LpAP))/((Km7+Lp) * P), Lp + P --> L + P # Lp dephosphorylation by phosphatase using Michaelis-Menten
     (ka4,kb4), LpA + P <--> LpAP # Membrane-bound adaptor binding to phosphatase 
-    (kcat7*P*DF)*Lp/(Km7+Lp), Lp + LpAP --> L + LpAP # 2D reaction: Membrane-bound phosphatase binds to Lp with greater affinity as determined by y (V/A) using Michaelis-Menten
+    DF * (kcat7*(P+LpAP))/((Km7+Lp) * LpAP), Lp + LpAP --> L + LpAP # 2D reaction: Membrane-bound phosphatase binds to Lp with greater affinity as determined by y (V/A) using Michaelis-Menten
 end
 
 p = rand(11)
