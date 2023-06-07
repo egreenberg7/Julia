@@ -31,7 +31,7 @@ function getDif(peakvals::Vector{Float64})
 end
 
 """Get summed average standard deviation of peaks in the frequency domain"""
-function getSTD(fft_peakindxs::Vector{Int}, fft_arrayData::Vector{Float64}; window::Int = 2)#, window_ratio::Float64) #get average standard deviation of fft peak indexes
+function getSTD(fft_peakindxs::Vector{Int}, fft_arrayData::Vector{Float64}; window::Int = 1)#, window_ratio::Float64) #get average standard deviation of fft peak indexes
     arrLen = length(fft_arrayData)
     sum_std = @inbounds sum(std(fft_arrayData[max(1, ind - window):min(arrLen, ind + window)]) for ind in fft_peakindxs) #* sum rolling window of standard deviations
     return sum_std / length(fft_peakindxs) #* divide by number of peaks to get average std
