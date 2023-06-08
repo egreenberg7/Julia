@@ -1,3 +1,4 @@
+#=
 #! Helper functions for cost function ## 
 
 #< START 
@@ -91,3 +92,4 @@ function std_solve_for_fitness_peramp(prob)
 
     return stdCostFunction(sol)
 end
+=#

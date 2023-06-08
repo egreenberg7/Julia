@@ -256,7 +256,7 @@ function run_GA(ga_problem::GAProblem, fitnessfunction_factory::Function=make_fi
 
     # Define options for the GA.
     opts = Evolutionary.Options(abstol=abstol, reltol=reltol, successive_f_tol = successive_f_tol, iterations=iterations, 
-                        store_trace = true, show_trace=true, show_every=1, parallelization=parallelization, callback=callback_func)
+                        store_trace = true, show_trace=true, show_every=1, parallelization=parallelization)#, callback=callback_func
 
     # Define the range of possible values for each parameter.
     mutation_scalar = 0.5; mutation_range = fill(mutation_scalar, length(ga_problem.constraints.ranges))

@@ -1,3 +1,6 @@
+#TODO Currently, we have it so that LpAK_0=K_0=sum(both). Need to find more realistic initial concentrations.
+#TODO Also, we have to find what regimes the MM will hold on the 2D in addition to just the regular set-up.
+
 """
 Michaelis-Menten approximation of the original oscillator model, without all possible pairs of reactions
 Note that V_max=kcat*E. Because the velocity of the reaction is given by V_max[S]/(Km+S),
@@ -18,7 +21,7 @@ mm_rn = @reaction_network mm_rn begin
     DF * (kcat7*(P+LpAP))/((Km7+Lp) * LpAP), Lp + LpAP --> L + LpAP # 2D reaction: Membrane-bound phosphatase binds to Lp with greater affinity as determined by y (V/A) using Michaelis-Menten
 end
 
-psym=[0, 15, 0.0007, 0.002, 0, 0, 0, 0, 39, 85.3, 1500] #0s are unknown, 1500 put in as nominal value for df based on Jonathan
+psym=[0, 15, 0.0007, 0.002, 0.118, 0.0609, 0, 0, 39, 85.3, 1500] #0s are unknown, 1500 put in as nominal value for df based on Jonathan
 
 #=
 p = rand(11)
