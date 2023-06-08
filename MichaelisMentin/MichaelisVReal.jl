@@ -55,17 +55,18 @@ end
 
 #parameter list Changed this around
 """ka1, kb1, kcat1, ka2, kb2, ka3, kb3, ka4, kb4, ka7, kb7, kcat7, y"""
-psym = [:ka1 => 2.009433439939827041, :kb1 => 2.3550169939427845, :kcat1 => 832.7213093872278, :ka2 => 12.993995997539924, :kb2 => 6.150972501791291,
+psym = [:ka1 => 2.009433439939827041, :kb1 => 2.3550169939427845, :kcat1 => 83.7213093872278, :ka2 => 12.993995997539924, :kb2 => 6.150972501791291,
         :ka3 => 1.3481451097940793, :kb3 => 0.006201726090609513, :ka4 => 0.006277294665474662, :kb4 => 0.9250191811994848, :ka7 => 57.36471615394549, 
         :kb7 => 50.04411989797898752, :kcat7 => 42.288085868394326, :y => 3631.050539219606]
 p = [x[2] for x in psym]
     
 #initial condition list
 usym = [:L => 5, :Lp => 5, :K => 0.1, :P => 0.1, :A => 0.1, :LpA => 0.0, :LK => 0.0, 
-        :LpP => 0.0, :LpAK => 0.0, :LpAP => 0.0, :LpAKL => 0.0, :LpAPLp => 0.0, :AK => 0.0, :AP => 0.0, 
+        :LpP => 0.0, :LpAK => 0.0, :LpAP => 0.01, :LpAKL => 0.0, :LpAPLp => 0.0, :AK => 0.0, :AP => 0.0, 
         :AKL => 0.0, :APLp => 0.0]
 u0 = [x[2] for x in usym]
 
+#=
 mm_rn = @reaction_network mm_rn begin
     @parameters kcat1 Km1 ka2 kb2 ka3 kb3 ka4 kb4 kcat7 Km7 DF
     @species L(t) K(t) P(t) A(t) Lp(t) LpA(t) LpAK(t) LpAP(t) 
@@ -77,6 +78,20 @@ mm_rn = @reaction_network mm_rn begin
     (kcat7*(P+LpAP))/((Km7+Lp) * P), Lp + P --> L + P # Lp dephosphorylation by phosphatase using Michaelis-Menten
     (ka4,kb4), LpA + P <--> LpAP # Membrane-bound adaptor binding to phosphatase 
     DF * (kcat7*(P+LpAP))/((Km7+Lp) * LpAP), Lp + LpAP --> L + LpAP # 2D reaction: Membrane-bound phosphatase binds to Lp with greater affinity as determined by y (V/A) using Michaelis-Menten
+end
+=#
+
+mm_rn = @reaction_network mm_rn begin
+    @parameters kcat1 Km1 ka2 kb2 ka3 kb3 ka4 kb4 kcat7 Km7 DF
+    @species L(t) K(t) P(t) A(t) Lp(t) LpA(t) LpAK(t) LpAP(t) 
+
+    kcat1 / Km1, L + K --> Lp + K # L phosphorylation by kinase into Lp using Michaelis-Menten
+    (ka2,kb2), Lp + A <--> LpA # Lp binding to AP2 adaptor
+    (ka3,kb3), LpA + K <--> LpAK # Membrane-bound adaptor binding to kinase
+    DF*kcat1 / Km1, LpAK + L --> Lp + LpAK # 2D reaction: Membrane-bound kinase binds to L with greater affinity as determined by y (V/A) using Michaelis-Menten
+    kcat7 / Km7, Lp + P --> L + P # Lp dephosphorylation by phosphatase using Michaelis-Menten
+    (ka4,kb4), LpA + P <--> LpAP # Membrane-bound adaptor binding to phosphatase 
+    DF * kcat7 / Km7, Lp + LpAP --> L + LpAP # 2D reaction: Membrane-bound phosphatase binds to Lp with greater affinity as determined by y (V/A) using Michaelis-Menten
 end
 
 """
@@ -100,7 +115,9 @@ the initial concentrations in the full model.
 """
 function findMMConc(fullConc::Vector{Float64})
     mmConc = zeros(8)
-    mmConc[1:5] = fullConc[1:5] #Sets initial conditions equal
+    mmConc[1:6] = fullConc[1:6] #Sets initial conditions equal
+    mmConc[7] = fullConc[9]
+    mmConc[8] = fullConc[10]
     return mmConc
 end
 
@@ -111,11 +128,11 @@ mmu0 = findMMConc(u0)
 const tspan = (0., 100.)
 #solve the reduced ODEs
 const fullProb = ODEProblem(fullrn, u0, tspan, p)
-const mmProb = ODEProblem(mm_rn, mmu0, tspan, mmp)
+mmProb = ODEProblem(mm_rn, mmu0, tspan, mmp)
 fullsol = solve(fullProb, saveat=0.1, save_idxs=1)
 mmsol = solve(mmProb, saveat=0.1, save_idxs=1)
 a,b = plot(fullsol), plot(mmsol)
-#plot(a,b)
+plot(a,b)
 
 #I changed the ranges of concentrations to try to meet the
 #substrate concentration assumption.
