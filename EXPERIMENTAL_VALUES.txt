@@ -18,6 +18,15 @@ diC8-PI(4,5)P2 is what is of interest I think, with Mg2+ and no mutants
 kcat7=85.3 s^-1
 Km7=39 uM
 
+Another synaptojanin (kcat7, Km7)
+https://doi.org/10.1177/1087057113510177
+Km = 138.5 uM
+kcat/Km = 3.6*10^5
+
+Synaptojanin 1 in humans binding to AP2 α-Appendage (ka4, kb4)
+https://doi.org/10.1038%2Fsj.emboj.7600445
+Kd = 29 uM
+
 Modified AP2 subunit binding to PIP5K (ka3, kb3)
 Supplemental text of https://doi.org/10.1073/pnas.0510306103
 ka3 = 0.118 uM^-1 s^-1
