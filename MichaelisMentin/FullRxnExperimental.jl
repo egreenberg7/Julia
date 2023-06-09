@@ -12,7 +12,7 @@ begin
     using BenchmarkTools, Profile, ProgressMeter
     # using MultivariateStats, UMAP, TSne, StatsPlots
     # using GlobalSensitivity, QuasiMonteCarlo
-    # using BifurcationKit, Setfield, LinearAlgebra, ForwardDiff, Parameters; const BK = BifurcationKit
+    using BifurcationKit, Setfield, LinearAlgebra, ForwardDiff, Parameters; const BK = BifurcationKit
     using ColorSchemes
     using Printf #And this
     default(lw = 2, size = (1000, 600))
@@ -71,7 +71,11 @@ psym = [:ka1 => 0.009433439939827041, :kb1 => 2.3550169939427845, :kcat1 => 832.
         :kb7 => 0.04411989797898752, :kcat7 => 42.288085868394326, :y => 3631.050539219606]
 p = [x[2] for x in psym]
 
-function constructParams(ka1, kb1, ka4, ka7, y)
+function constructParams(theka1, thekb1, theka4, theka7, they)
+        thepsym = [:ka1 => theka1, :kb1 => thekb1, :kcat1 => 15. * theka1 - thekb1, :ka2 => 0.7*10^-3, :kb2 => 2.0*10^-3,
+                 :ka3 => 0.118, :kb3 => 0.0609, :ka4 => theka4, :kb4 => 29. * ka4, :ka7 => theka7, 
+                 :kb7 => 39. * ka7 - kcat7, :kcat7 => 85.3, :y => they]
+                return [x[2] for x in thepsym]
 end
 
 
@@ -87,12 +91,24 @@ exp_prob = make_nerdssODEProb(fullrn; p=p, u0=u0)
 
 IC_Constraints = define_initialcondition_constraints()
 myGA_problem = GAProblem(IC_Constraints,exp_prob)
+BLAS.set_num_threads(1)
 record = run_GA(myGA_problem)
+BLAS.set_num_threads(4)
 
 recordDF=DataFrame(record)
-argmin(recordDF[!,:fit])
-mostFit = recordDF[20000,:]
+minIndex = argmin(recordDF[!,:fit])
+
+mostFit = recordDF[minIndex,:]
 sol = solve(remake(exp_prob, u0=vcat(mostFit[:ind],[5,0,0,0,0,0.01,0,0,0,0,0,0])), Rosenbrock23(),saveat=0.1)
-plot(sol)
+plot(sol[1,:])
 fftsol = abs.(rfft(sol[1,:]))
 plot(fftsol[2:end])
+findmaxima(fftsol,10)
+
+"""
+Very bad data...
+Row │ ind                         fit        per      amp     
+      │ Array…                      Float64    Float64  Float64 
+──────┼─────────────────────────────────────────────────────────
+ 8035 │ [8.75, 2.875, 0.475, 2.75]  -0.540809    1.615  3.87431
+ """
