@@ -72,23 +72,38 @@ function getPerAmp(sol::ODESolution)
     return mean(pers), mean(amps)
 end
 
+"""    
+Checks if from time:end of the solution the standard deviation is greater than 0.001 * the mean for the data points.
+Default time is 80 seconds. Makes it so fft unneeded on clearly nonoscillatory solutions.
+"""
+function isSteady(Y::ODESolution; time::Float64 = 80.0)
+    timeIndex = findfirst(x -> x > time, Y.t) #Find index of time greater than 80
+    solutionInterval = Y.u[timeIndex:end]
+    meanVal = mean(solutionInterval)
+    stdVal = std(solutionInterval)
+    return stdVal < 0.001 * meanVal
+end
+
 """Cost function to be plugged into eval_fitness wrapper"""
 function CostFunction(sol::ODESolution)::Vector{Float64}
     #*get the fft of the solution
+    if isSteady(sol)
+        return [1.0, 0.0, 0.0]
+    end   
     fftData = getFrequencies(sol.u)
     fft_peakindexes, fft_peakvals = findmaxima(fftData,10) #* get the indexes of the peaks in the fft
     time_peakindexes, time_peakvals = findmaxima(sol.u,5) #* get the times of the peaks in the fft
     if length(fft_peakindexes) < 2 || length(time_peakindexes) < 2 #* if there are no peaks in either domain, return 0
-        return [0.0, 0.0, 0.0]
+        return [1.0, 0.0, 0.0]
     end
     std = getSTD(fft_peakindexes, fftData) #* get the average standard deviation of the peaks in frequency domain
-    diff = getDif(fft_peakvals) #* get the summed difference between the peaks in frequency domain
+    #diff = getDif(fft_peakvals) #* get the summed difference between the peaks in frequency domain
 
     #* Compute the period and amplitude
     period, amplitude = getPerAmp(sol, time_peakindexes, time_peakvals)
 
     #* Return cost, period, and amplitude as a vector
-    return [-std - diff, period, amplitude]
+    return [-std, period, amplitude]
 end
 
 
@@ -123,57 +138,5 @@ function solve_for_fitness_peramp(prob)
 
     return CostFunction(sol)
 end
-
-
-# """Custom data structure to store the period and amplitude of each individual"""
-# struct PeriodAmplitudes
-#     peramps::Dict{Vector{Float64}, Tuple{Float64, Float64}}
-
-#     PeriodAmplitudes() = new(Dict{Vector{Float64}, Tuple{Float64, Float64}}())
-# end    
-
-# """Helper function to update the period and amplitude of an individual, using in place in CostFunction"""
-# function update_peramp!(tracker::PeriodAmplitudes, parameters::Vector{Float64}, values::Tuple{Float64, Float64})
-#     tracker.peramps[parameters] = values
-# end
-
-
-# """Evaluate the fitness of an individual with new parameters and track periods and amplitudes"""
-# function eval_param_fitness(params::Vector{Float64},  prob::ODEProblem, tracker::PeriodAmplitudes)
-#     # remake with new parameters
-#     new_prob = remake(prob, p=params)
-#     return eval_fitness_catcherrors!(new_prob, tracker)
-# end
-
-# """Evaluate the fitness of an individual with new initial conditions and track periods and amplitudes"""
-# function eval_ic_fitness(initial_conditions::Vector{Float64}, prob::ODEProblem, tracker::PeriodAmplitudes)
-#     # remake with new initial conditions
-#     new_prob = remake(prob, u0=initial_conditions)
-#     return eval_fitness_catcherrors!(new_prob, tracker)
-# end
-
-# """Cost function that also updates the period and amplitude in the tracker"""
-# function eval_fitness_catcherrors!(prob::ODEProblem, peramp_tracker::PeriodAmplitudes)
-#     Y = nothing
-#     try 
-#         Y = solve(prob, saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
-#         if Y.retcode in (ReturnCode.Unstable, ReturnCode.MaxIters) || any(x==1 for array in isnan.(Y) for x in array) || any(x==1 for array in isless.(Y, 0.0) for x in array)
-#             return 1.0
-#         end
-#     catch e 
-#         if e isa DomainError #catch domain errors
-#             return 1.0
-#         else
-#             rethrow(e) #rethrow other errors
-#         end
-#     end
-#     fitness, period, amplitude = CostFunction(Y)
-
-#     # Update the additional values stored in the tracker
-#     update_peramp!(peramp_tracker, p, (period, amplitude))
-
-#     return -fitness
-# end
-
 
 
