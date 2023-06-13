@@ -45,8 +45,8 @@ fullrn = @reaction_network fullrn begin
     (ka4,kb4), A + P <--> AP
     (ka3,kb3), A + LK <--> AKL
     (ka4,kb4), A + LpP <--> APLp
-    (ka3*y,kb3), LpA + LK <--> LpAKL #?Excluded in MM
-    (ka4*y,kb4), LpA + LpP <--> LpAPLp #? Excluded in MM
+    (ka3*y,kb3), LpA + LK <--> LpAKL 
+    (ka4*y,kb4), LpA + LpP <--> LpAPLp 
     (ka1,kb1), AK + L <--> AKL #binding of kinase to lipid
     kcat1, AKL --> Lp + AK #phosphorylation of lipid
     (ka7,kb7), AP + Lp <--> APLp #binding of phosphatase to lipid
@@ -81,7 +81,7 @@ mm_rn = @reaction_network mm_rn begin
     DF * kcat7 / Km7, Lp + LpAP --> L + LpAP # 2D reaction: Membrane-bound phosphatase binds to Lp with greater affinity as determined by y (V/A) using Michaelis-Menten
 
     #The previously exluded reactions
-    #For exlcuded intermediates my MM like LK, I used the fact that LK = L*K/Km
+    #For exlcuded intermediates in my MM like LK, I used the fact that LK = L*K/Km
 
     (ka2,kb2), Lp + AK <--> LpAK
     (ka2*y,kb2), Lp + AKL <--> LpAKL
@@ -90,11 +90,11 @@ mm_rn = @reaction_network mm_rn begin
     (ka3,kb3), A + K <--> AK
     (ka4,kb4), A + P <--> AP
 
-    (ka3 / Km1, kb3), A + L + K <--> AKL #(ka3,kb3), A + LK <--> AKL
-    (ka4 / Km7, kb4), A + Lp + P <--> APLp #(ka4,kb4), A + LpP <--> APLp
+    (ka3 / Km1, kb3), A + K + L <--> AKL #(ka3,kb3), A + LK <--> AKL
+    (ka4 / Km7, kb4), A + P + Lp  <--> APLp #(ka4,kb4), A + LpP <--> APLp
 
-    (ka3 * DF / Km1, kb3), LpA + L + K <--> LpAKL # (ka3*y,kb3), LpA + LK <--> LpAKL 
-    (ka4 * DF / Km7, kb4), LpA + L + P <--> LpAPLp # (ka4*y,kb4), LpA + LpP <--> LpAPLp 
+    (ka3 * DF / Km1, kb3), LpA + L + K  <--> LpAKL # (ka3*y,kb3), LpA + LK <--> LpAKL 
+    (ka4 * DF  / Km7, kb4), LpA + Lp + P <--> LpAPLp # (ka4*y,kb4), LpA + LpP <--> LpAPLp 
     kcat1 / Km1, AK + L --> AK +Lp #binding of kinase to lipid 
     kcat7 / Km7, AP + Lp --> AP + L #binding of phosphatase to lipid 
 end
@@ -135,25 +135,24 @@ fullProb = ODEProblem(fullrn, u0, tspan, p)
 mmProb = ODEProblem(mm_rn, mmu0, tspan, mmp)
 fullsol = solve(fullProb, saveat=0.1, save_idxs=1)
 mmsol = solve(mmProb, saveat=0.1, save_idxs=1)
-a,b = plot(fullsol), plot(mmsol)
-plot(a,b)
+a = plot(fullsol, label = "Full")
+a = plot!(mmsol, label = "MM")
 
 #I changed the ranges of concentrations to try to meet the
 #substrate concentration assumption.
 numIterations = 100
 for i in 1:numIterations
     u0[1] = rand(Random.seed!(4 * numIterations + i),Distributions.LogUniform(1, 100)) #L
-    u0[2] = rand(Random.seed!(i),Distributions.LogUniform(1, 100)) #Lp
-    u0[3] = rand(Random.seed!(numIterations + i),Distributions.LogUniform(0.001, 0.1)) #K
-    u0[4] = rand(Random.seed!(2 * numIterations + i),Distributions.LogUniform(0.01, 0.1)) #P
-    u0[5] = rand(Random.seed!(3 * numIterations + i),Distributions.LogUniform(0.001, 0.1)) #A
+    u0[2] = 0#rand(Random.seed!(i),Distributions.LogUniform(0, 0)) #Lp
+    u0[3] = rand(Random.seed!(numIterations + i),Distributions.LogUniform(0.001, 1)) #K
+    u0[4] = rand(Random.seed!(2 * numIterations + i),Distributions.LogUniform(0.01, 1)) #P
+    u0[5] = rand(Random.seed!(3 * numIterations + i),Distributions.LogUniform(0.001, 1)) #A
     mmu0 = findMMConc(u0)
-    currentFullSol = solve(remake(fullProb, u0=u0), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
-    currentMMSol = solve(remake(mmProb, u0=mmu0), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+    currentFullSol = solve(remake(fullProb, u0=u0), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+    currentMMSol = solve(remake(mmProb, u0=mmu0), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
     name = "L=$(u0[1]) Lp=$(u0[2]) K=$(u0[3]) P=$(u0[4]) A=$(u0[5]).png"
-    fullSolPlot = plot(currentFullSol, title="Full Reaction")
-    mmSolPlot = plot(currentMMSol, title="MM Reaction")
-    plot(fullSolPlot,mmSolPlot, layout=(2,1))
+    SolPlot = plot(currentFullSol, label="Full Reaction", ylims=(0,1.25 * u0[1]))
+    SolPlot = plot!(currentMMSol, label="MM Reaction", ylims=(0,1.25*u0[1]))
     savefig("~/mmTest/$name")
 end
 
