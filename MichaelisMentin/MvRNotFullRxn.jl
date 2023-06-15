@@ -40,13 +40,14 @@ end
 
 #parameter list
 """ka1, kb1, kcat1, ka2, kb2, ka3, kb3, ka4, kb4, ka7, kb7, kcat7, y"""
-psym = [:ka1 => 0.009433439939827041, :kb1 => 2.3550169939427845, :kcat1 => 832.7213093872278, :ka2 => 12.993995997539924, :kb2 => 6.150972501791291,
-        :ka3 => 1.3481451097940793, :kb3 => 0.006201726090609513, :ka4 => 0.006277294665474662, :kb4 => 0.9250191811994848, :ka7 => 57.36471615394549, 
-        :kb7 => 0.04411989797898752, :kcat7 => 42.288085868394326, :y => 3631.050539219606]
+psym = [:ka1 => 0.055, :kb1 => 19.8, :kcat1 => 241, :ka2 => 1, :kb2 => 0.95,
+        :ka3 => 41, :kb3 => 193, :ka4 => 0.19, :kb4 => 0.13, :ka7 => 0.62, 
+        :kb7 => 3.39, :kcat7 => 4.6, :y => 750]
 p = [x[2] for x in psym]
-
-usym = [:L => 10^1.6, :Lp => 0.0, :K => 10^0.8, :P => 10^0.6, :A => 10^1.2, :LpA => 0.0, :LK => 0.0, 
-        :LpP => 0.0, :LpAK => 0.0, :LpAP => 0.0, :LpAKL => 0.0, :LpAPLp => 0.0 ]
+    
+#initial condition list
+usym = [:L => 0.2, :Lp => 3.0, :K => 0.2, :P => 0.3, :A => 0.6, :LpA => 0.01, :LK => 0., 
+        :LpP => 0., :LpAK => 0.1, :LpAP => 0.01, :LpAKL => 0.0, :LpAPLp => 0.0 ]
 u0 = [x[2] for x in usym]
 
 """Only setting dLK/dt to 0 and dLpAKL/dt = 0"""
@@ -149,15 +150,15 @@ plot!(mmsol, label = "MM")
 #I changed the ranges of concentrations to try to meet the
 #substrate concentration assumption.
 #TODO Fix 2D Michaelis Menten approximation since the assumptions are not met when the enzyme concentration is variable even if it is low.
-numIterations = 1
+numIterations = 100
 for i in 1:numIterations
-    u0[1] = 0 # rand(Random.seed!(4 * numIterations + i),Distributions.LogUniform(1, 100)) #L
-    u0[2] = 10^0.4 #rand(Random.seed!(i),Distributions.LogUniform(0, 0)) #Lp
-    u0[3] = 10^-0.2 #rand(Random.seed!(numIterations + i),Distributions.LogUniform(0.1, 10.0)) #K
-    u0[4] = 10^-0.6 #rand(Random.seed!(2 * numIterations + i),Distributions.LogUniform(0.1, 10.0)) #P
-    u0[5] = 10^0.4 #rand(Random.seed!(3 * numIterations + i),Distributions.LogUniform(0.1, 10.0)) #A
+    u0[1] = rand(Random.seed!(4 * numIterations + i),Distributions.LogUniform(1, 100)) #L
+    u0[2] = 0 #rand(Random.seed!(i),Distributions.LogUniform(0, 0)) #Lp
+    u0[3] = rand(Random.seed!(numIterations + i),Distributions.LogUniform(0.1, 10.0)) #K
+    u0[4] = rand(Random.seed!(2 * numIterations + i),Distributions.LogUniform(0.1, 10.0)) #P
+    u0[5] = rand(Random.seed!(3 * numIterations + i),Distributions.LogUniform(0.1, 10.0)) #A
     mmu0 = findMMConc(u0)
-    currentFullSol = solve(remake(fullProb, u0=u0), Rosenbrock23(), saveat=0.1, save_idxs=2, maxiters=10000, verbose=false)
+    currentFullSol = solve(remake(fullProb1, u0=u0), Rosenbrock23(), saveat=0.1, save_idxs=2, maxiters=10000, verbose=false)
     currentMMSol = solve(remake(mmProb, u0=mmu0), Rosenbrock23(), saveat=0.1, save_idxs=2, maxiters=10000, verbose=false)
     name = "L=$(u0[1]) Lp=$(u0[2]) K=$(u0[3]) P=$(u0[4]) A=$(u0[5]).png"
     SolPlot = plot(currentFullSol, label="Full Reaction", ylims=(0,1.25 * u0[1]))

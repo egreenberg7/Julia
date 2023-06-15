@@ -61,7 +61,7 @@ psym = [:ka1 => 0.009433439939827041, :kb1 => 2.3550169939427845, :kcat1 => 832.
 p = [x[2] for x in psym]
     
 #initial condition list
-usym = [:L => 5, :Lp => 5, :K => 0.1, :P => 0.1, :A => 0.1, :LpA => 0.0, :LK => 0, 
+usym = [:L => 10^0.4, :Lp => 0, :K => 1, :P => 0.8, :A => 10, :LpA => 0.0, :LK => 0, 
         :LpP => 0, :LpAK => 0, :LpAP => 0, :LpAKL => 0., :LpAPLp => 0., :AK => 0., :AP => 0., 
         :AKL => 0., :APLp => 0.]
 u0 = [x[2] for x in usym]
@@ -142,11 +142,11 @@ a = plot!(mmsol, label = "MM")
 #substrate concentration assumption.
 numIterations = 100
 for i in 1:numIterations
-    u0[1] = rand(Random.seed!(4 * numIterations + i),Distributions.LogUniform(1, 100)) #L
-    u0[2] = 0#rand(Random.seed!(i),Distributions.LogUniform(0, 0)) #Lp
-    u0[3] = rand(Random.seed!(numIterations + i),Distributions.LogUniform(0.001, 1)) #K
-    u0[4] = rand(Random.seed!(2 * numIterations + i),Distributions.LogUniform(0.01, 1)) #P
-    u0[5] = rand(Random.seed!(3 * numIterations + i),Distributions.LogUniform(0.001, 1)) #A
+    u0[1] = 100 # rand(Random.seed!(4 * numIterations + i),Distributions.LogUniform(1, 100)) #L
+    u0[2] = 0.1 #rand(Random.seed!(i),Distributions.LogUniform(0, 0)) #Lp
+    u0[3] = rand(Random.seed!(numIterations + i),Distributions.LogUniform(0.1, 10.0)) #K
+    u0[4] = rand(Random.seed!(2 * numIterations + i),Distributions.LogUniform(0.1, 10.0)) #P
+    u0[5] = rand(Random.seed!(3 * numIterations + i),Distributions.LogUniform(0.1, 10.0)) #A
     mmu0 = findMMConc(u0)
     currentFullSol = solve(remake(fullProb, u0=u0), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
     currentMMSol = solve(remake(mmProb, u0=mmu0), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)

@@ -8,6 +8,9 @@ p = [x[2] for x in psym]
 usym = [:L => 10^1.6, :Lp => 0.0, :K => 10^0.8, :P => 10^0.6, :A => 10^1.2, :LpA => 0.0, :LK => 0.0, 
         :LpP => 0.0, :LpAK => 0.0, :LpAP => 0.0, :LpAKL => 0.0, :LpAPLp => 0.0 ]
 
+usym = [:L => 0, :Lp => 10.0^0.4, :K => 10.0^-0.2, :P => 10.0^-0.6, :A => 10.0^0.4, :LpA => 0.0, :LK => 0.0, 
+        :LpP => 0.0, :LpAK => 0.0, :LpAP => 0.0, :LpAKL => 0.0, :LpAPLp => 0.0 ]
+
 
 Very large oscillations
 #parameter list 
