@@ -50,4 +50,10 @@ function plotsol(row, df::DataFrame, prob::ODEProblem; vars::Vector{Int} = colle
         plotsol(reprob; vars)        
 end
 
+#From pre-merge...?
+function make_nerdssODEProb(rn; p::Vector{Float64}, u0::Vector{Float64},tspan = (0., 100.))
+        #? Create ODE problem
+        return ODEProblem(rn, u0, tspan, p) #TODO fix type stability
+    end
+
 

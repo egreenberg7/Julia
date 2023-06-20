@@ -95,15 +95,15 @@ BLAS.set_num_threads(1)
 record = run_GA(myGA_problem)
 BLAS.set_num_threads(4)
 
-recordDF=DataFrame(record)
-minIndex = argmin(recordDF[!,:fit])
+minIndex = argmin(record[!,:fit])
 
-mostFit = recordDF[minIndex,:]
+mostFit = record[minIndex,:]
 sol = solve(remake(exp_prob, u0=vcat(mostFit[:ind],[5,0,0,0,0,0.01,0,0,0,0,0,0])), Rosenbrock23(),saveat=0.1)
 plot(sol[1,:])
 fftsol = abs.(rfft(sol[1,:]))
 plot(fftsol[2:end])
 findmaxima(fftsol,10)
+isSteady(sol)
 
 """
 Very bad data...
