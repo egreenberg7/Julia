@@ -1,4 +1,5 @@
 
+import Evolutionary
 #! OVERRIDES FOR Evolutionary.jl ##
 """Custom GA state type that captures additional data from the objective function in the extradata field\n
     - `T` is the type of the fitness value\n
@@ -42,8 +43,24 @@ function Evolutionary.show(io::IO, t::Evolutionary.OptimizationTraceRecord)
 end
 
 
+"""
+    EvolutionaryObjective(f, x[, F])
+
+Constructor for an objective function object around the function `f` with initial parameter `x`, and objective value `F`.
+"""
+function Evolutionary.EvolutionaryObjective(f::TC, x::AbstractArray, F::Vector{Float64};
+                               eval::Symbol = :serial) where {TC}
+    @info "Using custom EvolutionaryObjective constructor"
+    defval = Evolutionary.default_values(x)
+    # convert function into the in-place one
+    TF = typeof(F)
+    fn = (Fv,xv) -> (Fv .= f(xv))
+    TN = typeof(fn)
+    EvolutionaryObjective{TN,TF,typeof(x),Val{eval}}(fn, F, defval, 0)
+end
+
 """Modified value! function from Evolutionary.jl to allow for multiple outputs from the objective function to be stored"""
-function Evolutionary.NLSolversBase.value!(obj::EvolutionaryObjective{TC,TF,TX,Val{:thread}},
+function Evolutionary.value!(obj::EvolutionaryObjective{TC,TF,TX,Val{:thread}},
                                 F::AbstractVector, E::AbstractVector, xs::AbstractVector{TX}) where {TC,TF<:AbstractVector,TX}
     n = length(xs)
     # @info "Evaluating $(n) individuals in parallel"
@@ -53,7 +70,7 @@ function Evolutionary.NLSolversBase.value!(obj::EvolutionaryObjective{TC,TF,TX,V
     # F, E
 end
 
-function Evolutionary.NLSolversBase.value!(obj::EvolutionaryObjective{TC,TF,TX,Val{:serial}},
+function Evolutionary.value!(obj::EvolutionaryObjective{TC,TF,TX,Val{:serial}},
                                 F::AbstractVector, E::AbstractVector, xs::AbstractVector{TX}) where {TC,TF<:AbstractVector,TX}
     n = length(xs)
     # @info "Evaluating $(n) individuals in serial"
@@ -91,6 +108,14 @@ function Evolutionary.initial_state(method::GA, options, objfun, population)
     return CustomGAState(N, eliteSize, minfit, fitness, extradata, copy(population[fitidx]))
 end
 
+"""Modified evaluate! function from Evolutionary.jl to allow for multiple outputs from the objective function to be stored"""
+function Evolutionary.evaluate!(objfun, fitness, extradata, population::Vector{Vector{Float64}}, constraints)
+    # calculate fitness of the population
+    Evolutionary.value!(objfun, fitness, extradata, population)
+    # apply penalty to fitness
+    Evolutionary.penalty!(fitness, constraints, population)
+end
+
 """Update state function that captures additional data from the objective function"""
 function Evolutionary.update_state!(objfun, constraints, state::CustomGAState, parents::AbstractVector{IT}, method::GA, options, itr) where {IT}
     populationSize = method.populationSize
@@ -115,9 +140,7 @@ function Evolutionary.update_state!(objfun, constraints, state::CustomGAState, p
     Evolutionary.mutate!(offspring, method, constraints, rng=rng)
 
     # calculate fitness and extradata of the population
-    # @info "Evaluating offspring in update_state!"
     Evolutionary.evaluate!(objfun, state.fitpop, state.extradata, offspring, constraints)
-    # @info "Finished evaluating offspring in update_state!"
 
     # select the best individual
     minfit, fitidx = findmin(state.fitpop)
@@ -130,10 +153,3 @@ function Evolutionary.update_state!(objfun, constraints, state::CustomGAState, p
     return false
 end
 
-"""Modified evaluate! function from Evolutionary.jl to allow for multiple outputs from the objective function to be stored"""
-function Evolutionary.evaluate!(objfun, fitness, extradata, population, constraints)
-    # calculate fitness of the population
-    Evolutionary.value!(objfun, fitness, extradata, population)
-    # apply penalty to fitness
-    Evolutionary.penalty!(fitness, constraints, population)
-end

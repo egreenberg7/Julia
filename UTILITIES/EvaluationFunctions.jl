@@ -1,7 +1,7 @@
-#! Helper functions for cost function ## 
+# Helper functions for cost function ## 
 
 # """Get summed difference of peaks in the frequency domain"""
-# function getDif(peakvals::Vector{Float64}) #todo fix normalization
+# function getDif(peakvals::Vector{Float64}) # fix normalization
 #     idxarrLen = length(peakvals)
 #     sum_diff = @inbounds sum(peakvals[i] - peakvals[i+1] for i in 1:(idxarrLen-1))
 #     # @info "Test sum diff of just first and last elements: $(peakvals[1] - peakvals[end])"
@@ -13,14 +13,29 @@
 # function getDif_bidirectional(peakvals::Vector{Float64})
 #     idxarrLen = length(peakvals)
 
-#     #* iterate from both ends simultaneously to deal with symmetry
+#     # iterate from both ends simultaneously to deal with symmetry
 #     sum_diff = @inbounds sum((peakvals[i] - peakvals[idxarrLen + 1 - i]) for i in 1:(idxarrLen ÷ 2)) 
 
-#     return 2 * sum_diff #* multiply by 2 to account for the fact that we're only summing half of the differences
+#     return 2 * sum_diff # multiply by 2 to account for the fact that we're only summing half of the differences
 # end
 
+
+"""
+# Module holding all evaluation functions for assesing oscillatory solutions
+"""
+# module EvaluationFunctions #< MODULE START
+
+# using DifferentialEquations: ODEProblem, ODESolution, solve, remake #* for ODESolution type
+# using FFTW: rfft #* for FFT
+
+# #* Exported functions #####
+# export getPerAmp, CostFunction, eval_ic_fitness, eval_param_fitness
+# #*#######
+
+
+
 """Get summed average difference of peaks in the frequency domain"""
-function getDifAvg(peakvals::Vector{Float64})
+function getDifAvg(peakvals::Vector{Float64}) #todo: compressed the range of values
     return (peakvals[1] - peakvals[end]) / length(peakvals)
 end
 
@@ -46,7 +61,11 @@ end
 """Calculates the period and amplitude of each individual in the population"""
 function getPerAmp(sol::ODESolution, indx_max::Vector{Int}, vals_max::Vector{Float64})
     #* Find peaks of the minima too 
-    indx_min, vals_min = findminima(sol.u, 5)
+    indx_min, vals_min = findminima(sol[1,:], 1)
+
+    if length(indx_max) < 1 || length(indx_min) < 1 #todo need to fix this, either keep or move check into cost function
+        return 0.0, 0.0
+    end
 
     #* Calculate amplitudes and periods
     @inbounds pers = (sol.t[indx_max[i+1]] - sol.t[indx_max[i]] for i in 1:(length(indx_max)-1))
@@ -61,7 +80,7 @@ function getPerAmp(sol::ODESolution)
     indx_max, vals_max = findmaxima(sol[1,:], 5)
     indx_min, vals_min = findminima(sol[1,:], 5)
 
-    if length(indx_max) < 3 || length(indx_min) < 3
+    if length(indx_max) < 2 || length(indx_min) < 2
         return 0.0, 0.0
     end
     #* Calculate amplitudes and periods
@@ -122,6 +141,15 @@ function eval_ic_fitness(initial_conditions::Vector{Float64}, prob::ODEProblem)
     return solve_for_fitness_peramp(new_prob)
 end
 
+"""Utility function to solve the ODE and return the fitness and period/amplitude"""
+function solve_for_fitness_peramp(prob)
+
+    sol = solve(prob, saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+
+    return CostFunction(sol)
+end
+
+
 # """Utility function to solve the ODE and return the fitness"""
 # function solve_for_fitness(prob::ODEProblem)
 
@@ -140,3 +168,4 @@ function solve_for_fitness_peramp(prob)
 end
 
 
+# end; #>MODULE END #Added in Jonathan's file, not sure why
