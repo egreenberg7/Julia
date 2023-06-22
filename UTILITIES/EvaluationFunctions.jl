@@ -105,10 +105,17 @@ end
 
 """Cost function to be plugged into eval_fitness wrapper"""
 function CostFunction(sol::ODESolution)::Vector{Float64}
-    #*get the fft of the solution
+    #*get| the fft of the solution
     if isSteady(sol)
         return [1.0, 0.0, 0.0]
-    end   
+    end
+    # timeIndex = findfirst(x -> x > 80, sol.t) #Find index of time greater than 80
+    # solutionInterval = sol.u[timeIndex:end]
+    # meanVal = mean(solutionInterval)
+    # stdVal = std(solutionInterval)
+    # if(stdVal / meanVal < 0.01)
+    #     println("Uh-oh")
+    # end   
     fftData = getFrequencies(sol.u)
     fft_peakindexes, fft_peakvals = findmaxima(fftData,10) #* get the indexes of the peaks in the fft
     time_peakindexes, time_peakvals = findmaxima(sol.u,5) #* get the times of the peaks in the fft
