@@ -91,18 +91,35 @@ exp_prob = make_nerdssODEProb(fullrn; p=p, u0=u0)
 
 IC_Constraints = define_initialcondition_constraints()
 myGA_problem = GAProblem(IC_Constraints,exp_prob)
-BLAS.set_num_threads(1)
 record = run_GA(myGA_problem)
-BLAS.set_num_threads(4)
 
+#=
 minIndex = argmin(record[!,:fit])
 
 mostFit = record[minIndex,:]
 sol = solve(remake(exp_prob, u0=vcat(mostFit[:ind],[5,0,0,0,0,0.01,0,0,0,0,0,0])), Rosenbrock23(),saveat=0.1)
 plot(sol[1,:])
+isSteady(sol)
+
+anotherFit = record[1000,:]
+sol = solve(remake(exp_prob, u0=vcat(anotherFit[:ind],[5,0,0,0,0,0.01,0,0,0,0,0,0])), Rosenbrock23(),saveat=0.1)
+plot(sol[1,:])
+isSteady(sol)
+=#
+for i in 1:size(record)[1]
+        curFit = record[i,:]
+        sol = solve(remake(exp_prob, u0=vcat(curFit[:ind],[5,0,0,0,0,0.01,0,0,0,0,0,0])), Rosenbrock23(),saveat=0.1, save_idxs = 1)
+        timeIndex = findfirst(x -> x > 80.0, sol.t) #Find index of time greater than 80
+        solutionInterval = sol.u[timeIndex:end]
+        meanVal = mean(solutionInterval)
+        stdVal = std(solutionInterval)
+        plot(sol[1,:])
+        savefig("graphStorage/Graph$(round(stdVal / meanVal, sigdigits = 3, base = 10)).png")
+end
+
 fftsol = abs.(rfft(sol[1,:]))
-plot(fftsol[2:end])
-findmaxima(fftsol,10)
+#plot(fftsol[2:end])
+#findmaxima(fftsol,10)
 isSteady(sol)
 
 """

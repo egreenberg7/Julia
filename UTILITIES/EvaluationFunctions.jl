@@ -92,7 +92,7 @@ function getPerAmp(sol::ODESolution)
 end
 
 """    
-Checks if from time:end of the solution the standard deviation is greater than 0.001 * the mean for the data points.
+Checks if from time:end of the solution the standard deviation is greater than 0.01 * the mean for the data points.
 Default time is 80 seconds. Makes it so fft unneeded on clearly nonoscillatory solutions.
 """
 function isSteady(Y::ODESolution; time::Float64 = 80.0)
@@ -100,7 +100,7 @@ function isSteady(Y::ODESolution; time::Float64 = 80.0)
     solutionInterval = Y.u[timeIndex:end]
     meanVal = mean(solutionInterval)
     stdVal = std(solutionInterval)
-    return stdVal < 0.001 * meanVal
+    return stdVal > 0.01 * meanVal
 end
 
 """Cost function to be plugged into eval_fitness wrapper"""
