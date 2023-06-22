@@ -1,0 +1,18 @@
+dAK.eq.A*K*ka3 - AK*kb3 + AKL*ka1*Km1 - AK*ka1*L - AK*ka2*Lp + kb2*LpAK.and.
+     -  dAKL.eq.-(AKL*kb3) - AKL*ka1*Km1 + AK*ka1*L + A*ka3*LK - AKL*DF*ka2*Lp + 
+     -    kb2*LpAKL.and.dK.eq.
+     -   -(A*K*ka3) + AK*kb3 + AKL*kb3 - A*ka3*LK - K*ka3*LpA - DF*ka3*LK*LpA + 
+     -    kb3*LpAK + kb3*LpAKL.and.dL.eq.
+     -   AKL*kb3 - AKL*kcat1 + APLp*kcat7 + AKL*ka1*Km1 - AK*ka1*L - A*ka3*LK - 
+     -    kcat1*LK + AKL*DF*ka2*Lp - kb2*LpAKL - kcat1*LpAKL + kcat7*LpAPLp + kcat7*LpP.\
+     -   and.dLK.eq.0.and.dLpAK.eq.
+     -   AK*ka2*Lp + AKL*DF*ka2*Lp + K*ka3*LpA + DF*ka3*LK*LpA - kb2*LpAK - kb3*LpAK - 
+     -    kb2*LpAKL - kb3*LpAKL.and.dLpAKL.eq.0.and.
+     -  Km1*LK.eq.
+     -   (AKL*kb3)/ka1 + K*L - (A*ka3*LK)/ka1 - (DF*ka3*LK*LpA)/ka1 + (kb3*LpAKL)/ka1.an\
+     -   d.Km1*LpAKL.eq.
+     -   (AKL*DF*ka2*Lp)/ka1 + (DF*ka3*LK*LpA)/ka1 + DF*L*LpAK - (kb2*LpAKL)/ka1 - 
+     -    (kb3*LpAKL)/ka1.and.kb2*LK*LpAKL.eq.
+     -   AKL*DF*ka2*LK*Lp + DF*ka3*LK**2*LpA + DF*ka1*L*LK*LpAK - AKL*kb3*LpAKL - 
+     -    K*ka1*L*LpAKL + A*ka3*LK*LpAKL - kb3*LK*LpAKL + DF*ka3*LK*LpA*LpAKL - 
+     -    kb3*LpAKL**2.and.ka1.ne.0

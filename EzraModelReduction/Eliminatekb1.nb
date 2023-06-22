@@ -1,0 +1,567 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     22201,        559]
+NotebookOptionsPosition[     20865,        528]
+NotebookOutlinePosition[     21259,        544]
+CellTagsIndexPosition[     21216,        541]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[""], "Input",
+ CellChangeTimes->{{3.896453107128973*^9, 3.8964531113404417`*^9}, {
+  3.896455347375551*^9, 
+  3.896455348955007*^9}},ExpressionUUID->"994305fd-aba9-4879-a2f6-\
+5557358202a5"],
+
+Cell[BoxData[""], "Input",
+ CellChangeTimes->{{3.896455345504757*^9, 
+  3.8964553455074463`*^9}},ExpressionUUID->"ef2185f3-3a9a-41ec-9875-\
+f38b04e98f48"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Eliminate", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"dL", "==", 
+      RowBox[{
+       RowBox[{"kb1", "*", "AKL"}], "+", 
+       RowBox[{"kcat7", "*", "APLp"}], "+", 
+       RowBox[{"kb1", "*", "LK"}], "+", 
+       RowBox[{"kb1", "*", "LpAKL"}], "+", 
+       RowBox[{"kcat7", "*", "LpAPLp"}], "+", 
+       RowBox[{"kcat7", "*", "LpP"}], "-", 
+       RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+       RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+       RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}]}]}], ",", 
+     RowBox[{"dK", "==", 
+      RowBox[{
+       RowBox[{"kb1", "*", "LK"}], "+", 
+       RowBox[{"kb3", "*", "AK"}], "+", 
+       RowBox[{"kcat1", "*", "LK"}], "+", 
+       RowBox[{"kb3", "*", "LpAK"}], "-", 
+       RowBox[{"ka3", "*", "A", "*", "K"}], "-", 
+       RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+       RowBox[{"ka3", "*", "K", "*", "LpA"}]}]}], ",", "\n", 
+     RowBox[{"dLK", "==", 
+      RowBox[{
+       RowBox[{"kb3", "*", "AKL"}], "+", 
+       RowBox[{"kb3", "*", "LpAKL"}], "+", 
+       RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+       RowBox[{"kb1", "*", "LK"}], "-", 
+       RowBox[{"kcat1", "*", "LK"}], "-", 
+       RowBox[{"ka3", "*", "A", "*", "LK"}], "-", 
+       RowBox[{"ka3", "*", "DF", "*", "LK", "*", "LpA"}]}]}], ",", 
+     RowBox[{"dLpAK", "==", 
+      RowBox[{
+       RowBox[{"kb1", "*", "LpAKL"}], "+", 
+       RowBox[{"kcat1", "*", "LpAKL"}], "+", 
+       RowBox[{"ka2", "*", "AK", "*", "Lp"}], "+", 
+       RowBox[{"ka3", "*", "K", "*", "LpA"}], "-", 
+       RowBox[{"kb2", "*", "LpAK"}], "-", 
+       RowBox[{"kb3", "*", "LpAK"}], "-", 
+       RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}]}]}], ",", 
+     RowBox[{"dLpAKL", "==", 
+      RowBox[{
+       RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}], "+", 
+       RowBox[{"ka2", "*", "DF", "*", "AKL", "*", "Lp"}], "+", 
+       RowBox[{"ka3", "*", "DF", "*", "LK", "*", "LpA"}], "-", 
+       RowBox[{"kb1", "*", "LpAKL"}], "-", 
+       RowBox[{"kb2", "*", "LpAKL"}], "-", 
+       RowBox[{"kb3", "*", "LpAKL"}], "-", 
+       RowBox[{"kcat1", "*", "LpAKL"}]}]}], ",", " ", 
+     RowBox[{"dAK", "==", 
+      RowBox[{
+       RowBox[{"kb1", "*", "AKL"}], "+", 
+       RowBox[{"kb2", "*", "LpAK"}], "+", 
+       RowBox[{"kcat1", "*", "AKL"}], "+", 
+       RowBox[{"ka3", "*", "A", "*", "K"}], "-", 
+       RowBox[{"kb3", "*", "AK"}], "-", 
+       RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+       RowBox[{"ka2", "*", "AK", "*", "Lp"}]}]}], ",", " ", 
+     RowBox[{"dAKL", "==", 
+      RowBox[{
+       RowBox[{"kb2", "*", "LpAKL"}], "+", 
+       RowBox[{"ka3", "*", "A", "*", "LK"}], "+", 
+       RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+       RowBox[{"kb1", "*", "AKL"}], "-", 
+       RowBox[{"kb3", "*", "AKL"}], "-", 
+       RowBox[{"kcat1", "*", "AKL"}], "-", 
+       RowBox[{"ka2", "*", "DF", "*", "AKL", "*", "Lp"}]}]}], ",", " ", 
+     RowBox[{"Km1", "==", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{"kb1", "+", "kcat1"}], ")"}], "/", "ka1"}]}], ",", " ", 
+     RowBox[{"dLK", " ", "==", " ", "0"}], ",", " ", 
+     RowBox[{"dLpAKL", " ", "==", "0"}]}], "}"}], ",", " ", 
+   RowBox[{"{", "kb1", "}"}]}], "\n", "]"}]], "Input",
+ CellChangeTimes->{{3.8964548703791656`*^9, 3.896454978840003*^9}, {
+  3.8964551723293257`*^9, 3.896455217099362*^9}, {3.896455476176569*^9, 
+  3.896455479540687*^9}},
+ CellLabel->"In[3]:=",ExpressionUUID->"303777e3-ba4f-4374-97c3-f6abe837c2eb"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"dAK", "\[Equal]", 
+   RowBox[{
+    RowBox[{"A", " ", "K", " ", "ka3"}], "-", 
+    RowBox[{"AK", " ", "kb3"}], "+", 
+    RowBox[{"AKL", " ", "ka1", " ", "Km1"}], "-", 
+    RowBox[{"AK", " ", "ka1", " ", "L"}], "-", 
+    RowBox[{"AK", " ", "ka2", " ", "Lp"}], "+", 
+    RowBox[{"kb2", " ", "LpAK"}]}]}], "&&", 
+  RowBox[{"dAKL", "\[Equal]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"-", "AKL"}], " ", "kb3"}], "-", 
+    RowBox[{"AKL", " ", "ka1", " ", "Km1"}], "+", 
+    RowBox[{"AK", " ", "ka1", " ", "L"}], "+", 
+    RowBox[{"A", " ", "ka3", " ", "LK"}], "-", 
+    RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "Lp"}], "+", 
+    RowBox[{"kb2", " ", "LpAKL"}]}]}], "&&", 
+  RowBox[{"dK", "\[Equal]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"-", "A"}], " ", "K", " ", "ka3"}], "+", 
+    RowBox[{"AK", " ", "kb3"}], "+", 
+    RowBox[{"AKL", " ", "kb3"}], "-", 
+    RowBox[{"A", " ", "ka3", " ", "LK"}], "-", 
+    RowBox[{"K", " ", "ka3", " ", "LpA"}], "-", 
+    RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA"}], "+", 
+    RowBox[{"kb3", " ", "LpAK"}], "+", 
+    RowBox[{"kb3", " ", "LpAKL"}]}]}], "&&", 
+  RowBox[{"dL", "\[Equal]", 
+   RowBox[{
+    RowBox[{"AKL", " ", "kb3"}], "-", 
+    RowBox[{"AKL", " ", "kcat1"}], "+", 
+    RowBox[{"APLp", " ", "kcat7"}], "+", 
+    RowBox[{"AKL", " ", "ka1", " ", "Km1"}], "-", 
+    RowBox[{"AK", " ", "ka1", " ", "L"}], "-", 
+    RowBox[{"A", " ", "ka3", " ", "LK"}], "-", 
+    RowBox[{"kcat1", " ", "LK"}], "+", 
+    RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "Lp"}], "-", 
+    RowBox[{"kb2", " ", "LpAKL"}], "-", 
+    RowBox[{"kcat1", " ", "LpAKL"}], "+", 
+    RowBox[{"kcat7", " ", "LpAPLp"}], "+", 
+    RowBox[{"kcat7", " ", "LpP"}]}]}], "&&", 
+  RowBox[{"dLK", "\[Equal]", "0"}], "&&", 
+  RowBox[{"dLpAK", "\[Equal]", 
+   RowBox[{
+    RowBox[{"AK", " ", "ka2", " ", "Lp"}], "+", 
+    RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "Lp"}], "+", 
+    RowBox[{"K", " ", "ka3", " ", "LpA"}], "+", 
+    RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA"}], "-", 
+    RowBox[{"kb2", " ", "LpAK"}], "-", 
+    RowBox[{"kb3", " ", "LpAK"}], "-", 
+    RowBox[{"kb2", " ", "LpAKL"}], "-", 
+    RowBox[{"kb3", " ", "LpAKL"}]}]}], "&&", 
+  RowBox[{"dLpAKL", "\[Equal]", "0"}], "&&", 
+  RowBox[{
+   RowBox[{"Km1", " ", "LK"}], "\[Equal]", 
+   RowBox[{
+    FractionBox[
+     RowBox[{"AKL", " ", "kb3"}], "ka1"], "+", 
+    RowBox[{"K", " ", "L"}], "-", 
+    FractionBox[
+     RowBox[{"A", " ", "ka3", " ", "LK"}], "ka1"], "-", 
+    FractionBox[
+     RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA"}], "ka1"], "+", 
+    FractionBox[
+     RowBox[{"kb3", " ", "LpAKL"}], "ka1"]}]}], "&&", 
+  RowBox[{
+   RowBox[{"Km1", " ", "LpAKL"}], "\[Equal]", 
+   RowBox[{
+    FractionBox[
+     RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "Lp"}], "ka1"], "+", 
+    FractionBox[
+     RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA"}], "ka1"], "+", 
+    RowBox[{"DF", " ", "L", " ", "LpAK"}], "-", 
+    FractionBox[
+     RowBox[{"kb2", " ", "LpAKL"}], "ka1"], "-", 
+    FractionBox[
+     RowBox[{"kb3", " ", "LpAKL"}], "ka1"]}]}], "&&", 
+  RowBox[{
+   RowBox[{"kb2", " ", "LK", " ", "LpAKL"}], "\[Equal]", 
+   RowBox[{
+    RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "LK", " ", "Lp"}], "+", 
+    RowBox[{"DF", " ", "ka3", " ", 
+     SuperscriptBox["LK", "2"], " ", "LpA"}], "+", 
+    RowBox[{"DF", " ", "ka1", " ", "L", " ", "LK", " ", "LpAK"}], "-", 
+    RowBox[{"AKL", " ", "kb3", " ", "LpAKL"}], "-", 
+    RowBox[{"K", " ", "ka1", " ", "L", " ", "LpAKL"}], "+", 
+    RowBox[{"A", " ", "ka3", " ", "LK", " ", "LpAKL"}], "-", 
+    RowBox[{"kb3", " ", "LK", " ", "LpAKL"}], "+", 
+    RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA", " ", "LpAKL"}], "-", 
+    RowBox[{"kb3", " ", 
+     SuperscriptBox["LpAKL", "2"]}]}]}], "&&", 
+  RowBox[{"ka1", "\[NotEqual]", "0"}]}]], "Output",
+ CellChangeTimes->{3.896455222931588*^9, 3.8964554824283953`*^9},
+ CellLabel->"Out[3]=",ExpressionUUID->"d531fe65-e1ea-47e7-9565-74a770c2aa69"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Solve", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"dL", "==", 
+      RowBox[{
+       RowBox[{"kb1", "*", "AKL"}], "+", 
+       RowBox[{"kcat7", "*", "APLp"}], "+", 
+       RowBox[{"kb1", "*", "LK"}], "+", 
+       RowBox[{"kb1", "*", "LpAKL"}], "+", 
+       RowBox[{"kcat7", "*", "LpAPLp"}], "+", 
+       RowBox[{"kcat7", "*", "LpP"}], "-", 
+       RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+       RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+       RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}]}]}], ",", 
+     RowBox[{"dK", "==", 
+      RowBox[{
+       RowBox[{"kb1", "*", "LK"}], "+", 
+       RowBox[{"kb3", "*", "AK"}], "+", 
+       RowBox[{"kcat1", "*", "LK"}], "+", 
+       RowBox[{"kb3", "*", "LpAK"}], "-", 
+       RowBox[{"ka3", "*", "A", "*", "K"}], "-", 
+       RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+       RowBox[{"ka3", "*", "K", "*", "LpA"}]}]}], ",", "\n", 
+     RowBox[{"dLK", "==", 
+      RowBox[{
+       RowBox[{"kb3", "*", "AKL"}], "+", 
+       RowBox[{"kb3", "*", "LpAKL"}], "+", 
+       RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+       RowBox[{"kb1", "*", "LK"}], "-", 
+       RowBox[{"kcat1", "*", "LK"}], "-", 
+       RowBox[{"ka3", "*", "A", "*", "LK"}], "-", 
+       RowBox[{"ka3", "*", "DF", "*", "LK", "*", "LpA"}]}]}], ",", 
+     RowBox[{"dLpAK", "==", 
+      RowBox[{
+       RowBox[{"kb1", "*", "LpAKL"}], "+", 
+       RowBox[{"kcat1", "*", "LpAKL"}], "+", 
+       RowBox[{"ka2", "*", "AK", "*", "Lp"}], "+", 
+       RowBox[{"ka3", "*", "K", "*", "LpA"}], "-", 
+       RowBox[{"kb2", "*", "LpAK"}], "-", 
+       RowBox[{"kb3", "*", "LpAK"}], "-", 
+       RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}]}]}], ",", 
+     RowBox[{"dLpAKL", "==", 
+      RowBox[{
+       RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}], "+", 
+       RowBox[{"ka2", "*", "DF", "*", "AKL", "*", "Lp"}], "+", 
+       RowBox[{"ka3", "*", "DF", "*", "LK", "*", "LpA"}], "-", 
+       RowBox[{"kb1", "*", "LpAKL"}], "-", 
+       RowBox[{"kb2", "*", "LpAKL"}], "-", 
+       RowBox[{"kb3", "*", "LpAKL"}], "-", 
+       RowBox[{"kcat1", "*", "LpAKL"}]}]}], ",", " ", 
+     RowBox[{"dAK", "==", 
+      RowBox[{
+       RowBox[{"kb1", "*", "AKL"}], "+", 
+       RowBox[{"kb2", "*", "LpAK"}], "+", 
+       RowBox[{"kcat1", "*", "AKL"}], "+", 
+       RowBox[{"ka3", "*", "A", "*", "K"}], "-", 
+       RowBox[{"kb3", "*", "AK"}], "-", 
+       RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+       RowBox[{"ka2", "*", "AK", "*", "Lp"}]}]}], ",", " ", 
+     RowBox[{"dAKL", "==", 
+      RowBox[{
+       RowBox[{"kb2", "*", "LpAKL"}], "+", 
+       RowBox[{"ka3", "*", "A", "*", "LK"}], "+", 
+       RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+       RowBox[{"kb1", "*", "AKL"}], "-", 
+       RowBox[{"kb3", "*", "AKL"}], "-", 
+       RowBox[{"kcat1", "*", "AKL"}], "-", 
+       RowBox[{"ka2", "*", "DF", "*", "AKL", "*", "Lp"}]}]}], ",", " ", 
+     RowBox[{"Km1", "==", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{"kb1", "+", "kcat1"}], ")"}], "/", "ka1"}]}], ",", " ", 
+     RowBox[{"dLK", " ", "==", " ", "0"}], ",", " ", 
+     RowBox[{"dLpAKL", " ", "==", "0"}]}], "}"}], ",", " ", 
+   RowBox[{"{", "kb1", "}"}]}], "\n", "]"}]], "Input",
+ CellChangeTimes->{{3.896455525306143*^9, 
+  3.896455545787271*^9}},ExpressionUUID->"7c94817b-cac0-4f75-92d4-\
+d302eb3907aa"],
+
+Cell[BoxData[
+ RowBox[{"{", "}"}]], "Output",
+ CellChangeTimes->{3.896455528045508*^9},
+ CellLabel->"Out[4]=",ExpressionUUID->"5cf1c2a4-cd80-43ef-93c0-90942fe52855"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Nokb1", " ", "=", " ", 
+  RowBox[{"Eliminate", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"dL", "==", 
+       RowBox[{
+        RowBox[{"kb1", "*", "AKL"}], "+", 
+        RowBox[{"kcat7", "*", "APLp"}], "+", 
+        RowBox[{"kb1", "*", "LK"}], "+", 
+        RowBox[{"kb1", "*", "LpAKL"}], "+", 
+        RowBox[{"kcat7", "*", "LpAPLp"}], "+", 
+        RowBox[{"kcat7", "*", "LpP"}], "-", 
+        RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+        RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+        RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}]}]}], ",", 
+      RowBox[{"dK", "==", 
+       RowBox[{
+        RowBox[{"kb1", "*", "LK"}], "+", 
+        RowBox[{"kb3", "*", "AK"}], "+", 
+        RowBox[{"kcat1", "*", "LK"}], "+", 
+        RowBox[{"kb3", "*", "LpAK"}], "-", 
+        RowBox[{"ka3", "*", "A", "*", "K"}], "-", 
+        RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+        RowBox[{"ka3", "*", "K", "*", "LpA"}]}]}], ",", "\n", 
+      RowBox[{"dLK", "==", 
+       RowBox[{
+        RowBox[{"kb3", "*", "AKL"}], "+", 
+        RowBox[{"kb3", "*", "LpAKL"}], "+", 
+        RowBox[{"ka1", "*", "K", "*", "L"}], "-", 
+        RowBox[{"kb1", "*", "LK"}], "-", 
+        RowBox[{"kcat1", "*", "LK"}], "-", 
+        RowBox[{"ka3", "*", "A", "*", "LK"}], "-", 
+        RowBox[{"ka3", "*", "DF", "*", "LK", "*", "LpA"}]}]}], ",", 
+      RowBox[{"dLpAK", "==", 
+       RowBox[{
+        RowBox[{"kb1", "*", "LpAKL"}], "+", 
+        RowBox[{"kcat1", "*", "LpAKL"}], "+", 
+        RowBox[{"ka2", "*", "AK", "*", "Lp"}], "+", 
+        RowBox[{"ka3", "*", "K", "*", "LpA"}], "-", 
+        RowBox[{"kb2", "*", "LpAK"}], "-", 
+        RowBox[{"kb3", "*", "LpAK"}], "-", 
+        RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}]}]}], ",", 
+      RowBox[{"dLpAKL", "==", 
+       RowBox[{
+        RowBox[{"ka1", "*", "DF", "*", "L", "*", "LpAK"}], "+", 
+        RowBox[{"ka2", "*", "DF", "*", "AKL", "*", "Lp"}], "+", 
+        RowBox[{"ka3", "*", "DF", "*", "LK", "*", "LpA"}], "-", 
+        RowBox[{"kb1", "*", "LpAKL"}], "-", 
+        RowBox[{"kb2", "*", "LpAKL"}], "-", 
+        RowBox[{"kb3", "*", "LpAKL"}], "-", 
+        RowBox[{"kcat1", "*", "LpAKL"}]}]}], ",", " ", 
+      RowBox[{"dAK", "==", 
+       RowBox[{
+        RowBox[{"kb1", "*", "AKL"}], "+", 
+        RowBox[{"kb2", "*", "LpAK"}], "+", 
+        RowBox[{"kcat1", "*", "AKL"}], "+", 
+        RowBox[{"ka3", "*", "A", "*", "K"}], "-", 
+        RowBox[{"kb3", "*", "AK"}], "-", 
+        RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+        RowBox[{"ka2", "*", "AK", "*", "Lp"}]}]}], ",", " ", 
+      RowBox[{"dAKL", "==", 
+       RowBox[{
+        RowBox[{"kb2", "*", "LpAKL"}], "+", 
+        RowBox[{"ka3", "*", "A", "*", "LK"}], "+", 
+        RowBox[{"ka1", "*", "AK", "*", "L"}], "-", 
+        RowBox[{"kb1", "*", "AKL"}], "-", 
+        RowBox[{"kb3", "*", "AKL"}], "-", 
+        RowBox[{"kcat1", "*", "AKL"}], "-", 
+        RowBox[{"ka2", "*", "DF", "*", "AKL", "*", "Lp"}]}]}], ",", " ", 
+      RowBox[{"Km1", "==", 
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{"kb1", "+", "kcat1"}], ")"}], "/", "ka1"}]}], ",", " ", 
+      RowBox[{"dLK", " ", "==", " ", "0"}], ",", " ", 
+      RowBox[{"dLpAKL", " ", "==", "0"}]}], "}"}], ",", " ", 
+    RowBox[{"{", "kb1", "}"}]}], "\n", "]"}]}]], "Input",
+ CellChangeTimes->{{3.8964556697134666`*^9, 3.8964556730436773`*^9}},
+ CellLabel->"In[5]:=",ExpressionUUID->"a080ba57-b430-44a9-ae6a-2d4aca371e13"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"dAK", "\[Equal]", 
+   RowBox[{
+    RowBox[{"A", " ", "K", " ", "ka3"}], "-", 
+    RowBox[{"AK", " ", "kb3"}], "+", 
+    RowBox[{"AKL", " ", "ka1", " ", "Km1"}], "-", 
+    RowBox[{"AK", " ", "ka1", " ", "L"}], "-", 
+    RowBox[{"AK", " ", "ka2", " ", "Lp"}], "+", 
+    RowBox[{"kb2", " ", "LpAK"}]}]}], "&&", 
+  RowBox[{"dAKL", "\[Equal]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"-", "AKL"}], " ", "kb3"}], "-", 
+    RowBox[{"AKL", " ", "ka1", " ", "Km1"}], "+", 
+    RowBox[{"AK", " ", "ka1", " ", "L"}], "+", 
+    RowBox[{"A", " ", "ka3", " ", "LK"}], "-", 
+    RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "Lp"}], "+", 
+    RowBox[{"kb2", " ", "LpAKL"}]}]}], "&&", 
+  RowBox[{"dK", "\[Equal]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"-", "A"}], " ", "K", " ", "ka3"}], "+", 
+    RowBox[{"AK", " ", "kb3"}], "+", 
+    RowBox[{"AKL", " ", "kb3"}], "-", 
+    RowBox[{"A", " ", "ka3", " ", "LK"}], "-", 
+    RowBox[{"K", " ", "ka3", " ", "LpA"}], "-", 
+    RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA"}], "+", 
+    RowBox[{"kb3", " ", "LpAK"}], "+", 
+    RowBox[{"kb3", " ", "LpAKL"}]}]}], "&&", 
+  RowBox[{"dL", "\[Equal]", 
+   RowBox[{
+    RowBox[{"AKL", " ", "kb3"}], "-", 
+    RowBox[{"AKL", " ", "kcat1"}], "+", 
+    RowBox[{"APLp", " ", "kcat7"}], "+", 
+    RowBox[{"AKL", " ", "ka1", " ", "Km1"}], "-", 
+    RowBox[{"AK", " ", "ka1", " ", "L"}], "-", 
+    RowBox[{"A", " ", "ka3", " ", "LK"}], "-", 
+    RowBox[{"kcat1", " ", "LK"}], "+", 
+    RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "Lp"}], "-", 
+    RowBox[{"kb2", " ", "LpAKL"}], "-", 
+    RowBox[{"kcat1", " ", "LpAKL"}], "+", 
+    RowBox[{"kcat7", " ", "LpAPLp"}], "+", 
+    RowBox[{"kcat7", " ", "LpP"}]}]}], "&&", 
+  RowBox[{"dLK", "\[Equal]", "0"}], "&&", 
+  RowBox[{"dLpAK", "\[Equal]", 
+   RowBox[{
+    RowBox[{"AK", " ", "ka2", " ", "Lp"}], "+", 
+    RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "Lp"}], "+", 
+    RowBox[{"K", " ", "ka3", " ", "LpA"}], "+", 
+    RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA"}], "-", 
+    RowBox[{"kb2", " ", "LpAK"}], "-", 
+    RowBox[{"kb3", " ", "LpAK"}], "-", 
+    RowBox[{"kb2", " ", "LpAKL"}], "-", 
+    RowBox[{"kb3", " ", "LpAKL"}]}]}], "&&", 
+  RowBox[{"dLpAKL", "\[Equal]", "0"}], "&&", 
+  RowBox[{
+   RowBox[{"Km1", " ", "LK"}], "\[Equal]", 
+   RowBox[{
+    FractionBox[
+     RowBox[{"AKL", " ", "kb3"}], "ka1"], "+", 
+    RowBox[{"K", " ", "L"}], "-", 
+    FractionBox[
+     RowBox[{"A", " ", "ka3", " ", "LK"}], "ka1"], "-", 
+    FractionBox[
+     RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA"}], "ka1"], "+", 
+    FractionBox[
+     RowBox[{"kb3", " ", "LpAKL"}], "ka1"]}]}], "&&", 
+  RowBox[{
+   RowBox[{"Km1", " ", "LpAKL"}], "\[Equal]", 
+   RowBox[{
+    FractionBox[
+     RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "Lp"}], "ka1"], "+", 
+    FractionBox[
+     RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA"}], "ka1"], "+", 
+    RowBox[{"DF", " ", "L", " ", "LpAK"}], "-", 
+    FractionBox[
+     RowBox[{"kb2", " ", "LpAKL"}], "ka1"], "-", 
+    FractionBox[
+     RowBox[{"kb3", " ", "LpAKL"}], "ka1"]}]}], "&&", 
+  RowBox[{
+   RowBox[{"kb2", " ", "LK", " ", "LpAKL"}], "\[Equal]", 
+   RowBox[{
+    RowBox[{"AKL", " ", "DF", " ", "ka2", " ", "LK", " ", "Lp"}], "+", 
+    RowBox[{"DF", " ", "ka3", " ", 
+     SuperscriptBox["LK", "2"], " ", "LpA"}], "+", 
+    RowBox[{"DF", " ", "ka1", " ", "L", " ", "LK", " ", "LpAK"}], "-", 
+    RowBox[{"AKL", " ", "kb3", " ", "LpAKL"}], "-", 
+    RowBox[{"K", " ", "ka1", " ", "L", " ", "LpAKL"}], "+", 
+    RowBox[{"A", " ", "ka3", " ", "LK", " ", "LpAKL"}], "-", 
+    RowBox[{"kb3", " ", "LK", " ", "LpAKL"}], "+", 
+    RowBox[{"DF", " ", "ka3", " ", "LK", " ", "LpA", " ", "LpAKL"}], "-", 
+    RowBox[{"kb3", " ", 
+     SuperscriptBox["LpAKL", "2"]}]}]}], "&&", 
+  RowBox[{"ka1", "\[NotEqual]", "0"}]}]], "Output",
+ CellChangeTimes->{3.896455681035405*^9},
+ CellLabel->"Out[5]=",ExpressionUUID->"04ed8939-f147-407c-831d-ac491f284190"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FortranForm", "[", "Nokb1", "]"}]], "Input",
+ CellChangeTimes->{{3.896455687126951*^9, 3.896455709496896*^9}},
+ CellLabel->"In[6]:=",ExpressionUUID->"6d4b0948-f2d2-496e-a695-2f2046588122"],
+
+Cell["\<\
+        dAK.eq.A*K*ka3 - AK*kb3 + AKL*ka1*Km1 - AK*ka1*L - AK*ka2*Lp + \
+kb2*LpAK.and.
+     -  dAKL.eq.-(AKL*kb3) - AKL*ka1*Km1 + AK*ka1*L + A*ka3*LK - \
+AKL*DF*ka2*Lp + 
+     -    kb2*LpAKL.and.dK.eq.
+     -   -(A*K*ka3) + AK*kb3 + AKL*kb3 - A*ka3*LK - K*ka3*LpA - DF*ka3*LK*LpA \
++ 
+     -    kb3*LpAK + kb3*LpAKL.and.dL.eq.
+     -   AKL*kb3 - AKL*kcat1 + APLp*kcat7 + AKL*ka1*Km1 - AK*ka1*L - A*ka3*LK \
+- 
+     -    kcat1*LK + AKL*DF*ka2*Lp - kb2*LpAKL - kcat1*LpAKL + kcat7*LpAPLp + \
+kcat7*LpP.\\
+     -   and.dLK.eq.0.and.dLpAK.eq.
+     -   AK*ka2*Lp + AKL*DF*ka2*Lp + K*ka3*LpA + DF*ka3*LK*LpA - kb2*LpAK - \
+kb3*LpAK - 
+     -    kb2*LpAKL - kb3*LpAKL.and.dLpAKL.eq.0.and.
+     -  Km1*LK.eq.
+     -   (AKL*kb3)/ka1 + K*L - (A*ka3*LK)/ka1 - (DF*ka3*LK*LpA)/ka1 + \
+(kb3*LpAKL)/ka1.an\\
+     -   d.Km1*LpAKL.eq.
+     -   (AKL*DF*ka2*Lp)/ka1 + (DF*ka3*LK*LpA)/ka1 + DF*L*LpAK - \
+(kb2*LpAKL)/ka1 - 
+     -    (kb3*LpAKL)/ka1.and.kb2*LK*LpAKL.eq.
+     -   AKL*DF*ka2*LK*Lp + DF*ka3*LK**2*LpA + DF*ka1*L*LK*LpAK - \
+AKL*kb3*LpAKL - 
+     -    K*ka1*L*LpAKL + A*ka3*LK*LpAKL - kb3*LK*LpAKL + DF*ka3*LK*LpA*LpAKL \
+- 
+     -    kb3*LpAKL**2.and.ka1.ne.0\
+\>", "Output",
+ CellChangeTimes->{3.896455711766374*^9},
+ CellLabel->
+  "Out[6]//FortranForm=",ExpressionUUID->"04b1f52a-100e-40fd-9f3a-\
+e94e4f8bd931"]
+}, Open  ]]
+},
+WindowSize->{808, 671},
+WindowMargins->{{4, Automatic}, {Automatic, 4}},
+FrontEndVersion->"13.2 for Mac OS X ARM (64-bit) (January 30, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"f4239f4c-595c-403b-a146-44417f8be3dd"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 203, 4, 30, "Input",ExpressionUUID->"994305fd-aba9-4879-a2f6-5557358202a5"],
+Cell[764, 26, 154, 3, 30, "Input",ExpressionUUID->"ef2185f3-3a9a-41ec-9875-f38b04e98f48"],
+Cell[CellGroupData[{
+Cell[943, 33, 3439, 80, 283, "Input",ExpressionUUID->"303777e3-ba4f-4374-97c3-f6abe837c2eb"],
+Cell[4385, 115, 3952, 96, 262, "Output",ExpressionUUID->"d531fe65-e1ea-47e7-9565-74a770c2aa69"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8374, 216, 3315, 79, 283, "Input",ExpressionUUID->"7c94817b-cac0-4f75-92d4-d302eb3907aa"],
+Cell[11692, 297, 165, 3, 34, "Output",ExpressionUUID->"5cf1c2a4-cd80-43ef-93c0-90942fe52855"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11894, 305, 3453, 79, 304, "Input",ExpressionUUID->"a080ba57-b430-44a9-ae6a-2d4aca371e13"],
+Cell[15350, 386, 3928, 96, 262, "Output",ExpressionUUID->"04ed8939-f147-407c-831d-ac491f284190"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[19315, 487, 212, 3, 30, "Input",ExpressionUUID->"6d4b0948-f2d2-496e-a695-2f2046588122"],
+Cell[19530, 492, 1319, 33, 354, "Output",ExpressionUUID->"04b1f52a-100e-40fd-9f3a-e94e4f8bd931"]
+}, Open  ]]
+}
+]
+*)
+

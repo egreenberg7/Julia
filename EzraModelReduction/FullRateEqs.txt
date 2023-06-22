@@ -31,7 +31,6 @@ Km7 == (kb7 + kcat7) / ka7
 
 Experimental Values:
 
-
 Km1 == 15
 ka2 == 0.7 * (10 ^ -3)
 kb2 == 2.0 * (10 ^ -3)
@@ -40,3 +39,7 @@ kb3 == 0.0609
 Kd4 == 29
 Km7 == 39
 kcat7 == 85.3
+
+Michaelis-Menten Assumptions:
+dLK == 0
+dLpAKL == 0
