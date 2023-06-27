@@ -48,3 +48,26 @@ end
     dL*(-(DF*L*LpAK) + Km1*LpAKL) = AKL^2*DF*ka2*Km1*Lp - AK*AKL*DF*ka2*L*Lp + AKL*DF*ka3*Km1*LK*LpA - AK*DF*ka3*L*LK*LpA - AKL*DF*kb3*L*LpAK + AKL*DF*kcat1*L*LpAK - APLp*DF*kcat7*L*LpAK + A*DF*ka3*L*LK*LpAK + DF*kcat1*L*LK*LpAK - AKL*DF^2*ka2*L*Lp*LpAK - AKL*kb2*Km1*LpAKL - AKL*kcat1*Km1*LpAKL + APLp*kcat7*Km1*LpAKL + AK*kb2*L*LpAKL + AK*kb3*L*LpAKL - A*ka3*Km1*LK*LpAKL - kcat1*Km1*LK*LpAKL + AKL*DF*ka2*Km1*Lp*LpAKL + DF*kb2*L*LpAK*LpAKL + DF*kcat1*L*LpAK*LpAKL - kb2*Km1*LpAKL^2 - kcat1*Km1*LpAKL^2 - DF*kcat7*L*LpAK*LpAPLp + kcat7*Km1*LpAKL*LpAPLp - DF*kcat7*L*LpAK*LpP + kcat7*Km1*LpAKL*LpP 
     Km1*(-(AKL*DF*ka2*LK*Lp) - DF*ka3*LK^2*LpA + AKL*kb3*LpAKL - A*ka3*LK*LpAKL + kb2*LK*LpAKL + kb3*LK*LpAKL - DF*ka3*LK*LpA*LpAKL + kb3*LpAKL^2) = L*(-(AKL*DF*K*ka2*Lp) - DF*K*ka3*LK*LpA + AKL*DF*kb3*LpAK - A*DF*ka3*LK*LpAK - DF^2*ka3*LK*LpA*LpAK + K*kb2*LpAKL + K*kb3*LpAKL + DF*kb3*LpAK*LpAKL)
 =#
+
+#parameter list with experimental values
+"""Km1, kcat1, ka2, kb2, ka3, kb3, ka4, kb4, ka7, kb7, kcat7, DF"""
+#Unknown values marked with 0.0
+function makePsym(kcat1::Float64, ka4::Float64, ka7::Float64, DF::Float64)
+    return [:Km1 => 15.0, :kcat1 => kcat1, :ka2 => 0.7*10^-3, :kb2 => 2.0*10^-3,
+        :ka3 => 0.118, :kb3 => 0.0609, :ka4 => ka4, :kb4 => 29.0 * ka4, :ka7 => ka7, 
+        :kb7 => 39.0 * ka7 - 85.3, :kcat7 => 85.3, :df => DF]
+ end
+ psym = makePsym(0.1,0.2,0.3,0.4)
+ p = [x[2] for x in psym]
+
+#? Initial condition list
+usym = [:L => 5.0, :K => 0.5, :P => 0.3, :A => 2.0, :Lp => 0.0, :LpA => 0.0, :LK => 0.0, 
+        :LpP => 0.0, :LpAK => 0.0, :LpAP => 0.0, :LpAKL => 0.0, :LpAPLp => 0.0, :AK => 0.0, :AP => 0.0, 
+        :AKL => 0.0, :APLp => 0.0]
+u0 = [x[2] for x in usym]
+
+
+#? Timespan for integration
+tspan = (0., 100.)
+
+odeprob = ODEProblem(eliminationSystem!, u0, tspan, p)
