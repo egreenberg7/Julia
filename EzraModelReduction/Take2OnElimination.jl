@@ -71,3 +71,24 @@ u0 = [x[2] for x in usym]
 tspan = (0., 100.)
 
 odeprob = ODEProblem(eliminationSystem!, u0, tspan, p)
+
+#Validation against the system with no Michaelis-Menten approximations
+include("../UTILITIES/ODESystems.jl")
+
+inplaceprobfull = ODEProblem(fullmodel_ode!, u0, tspan, p)
+
+pMM = zeros(12)
+Km1 = sum(p[2:3])/p[1]
+pMM[1] = Km1
+pMM[2:12] = p[3:13]
+inplaceprobMM = ODEProblem(eliminationSystem!,u0,tspan,pMM)
+import Plots
+usym = [:L => 10^1.6,  :K => 10^0.8, :P => 10^0.6, :A => 10^1.2,:Lp => 0.0, :LpA => 0.0, :LK => 0.1, 
+        :LpP => 0.0, :LpAK => 0.0, :LpAP => 0.0, :LpAKL => 0.0, :LpAPLp => 0.0 ]
+# u0[1] = 3
+# u0[5] = 0
+u0=[i[2] for i in usym]
+solfull = solve(inplaceprobfull)
+solMM = solve(inplaceprobMM)
+Plots.plot(solfull)
+Plots.plot(solMM)
