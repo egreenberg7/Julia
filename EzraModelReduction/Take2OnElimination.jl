@@ -8,7 +8,7 @@ function eliminationSystem!(du, u, p, t)
      #dL = du[1] will have to be found from these constraints...
      #dL, dK, dAK, dAKL, dLK, dLpAK, dLpAKL are all from Mathematica
     #dL FROM FIRST MATHEMATICA CONSTRAINT; SEE BELOW THE function
-    dL = (AKL^2*kb3*Km1 - AK*AKL*kb3*L - AKL*K*kb3*L + AKL*K*kcat1*L - APLp*K*kcat7*L - A*AKL*ka3*Km1*LK + AKL*kb3*Km1*LK - AKL*kcat1*Km1*LK + APLp*kcat7*Km1*LK + A*AK*ka3*L*LK + A*K*ka3*L*LK + K*kcat1*L*LK - A*ka3*Km1*LK^2 - kcat1*Km1*LK^2 - AKL*DF*ka3*Km1*LK*LpA + AK*DF*ka3*L*LK*LpA + DF*K*ka3*L*LK*LpA - DF*ka3*Km1*LK^2*LpA - AKL*DF*kb3*L*LpAK + A*DF*ka3*L*LK*LpAK + DF^2*ka3*L*LK*LpA*LpAK + 2*AKL*kb3*Km1*LpAKL - AK*kb3*L*LpAKL - K*kb3*L*LpAKL + K*kcat1*L*LpAKL - A*ka3*Km1*LK*LpAKL + kb3*Km1*LK*LpAKL - kcat1*Km1*LK*LpAKL - DF*ka3*Km1*LK*LpA*LpAKL - DF*kb3*L*LpAK*LpAKL + kb3*Km1*LpAKL^2 - K*kcat7*L*LpAPLp + kcat7*Km1*LK*LpAPLp - K*kcat7*L*LpP + kcat7*Km1*LK*LpP ) / (-(K*L) + Km1*LK)
+    du[1] = (AKL^2*kb3*Km1 - AK*AKL*kb3*L - AKL*K*kb3*L + AKL*K*kcat1*L - APLp*K*kcat7*L - A*AKL*ka3*Km1*LK + AKL*kb3*Km1*LK - AKL*kcat1*Km1*LK + APLp*kcat7*Km1*LK + A*AK*ka3*L*LK + A*K*ka3*L*LK + K*kcat1*L*LK - A*ka3*Km1*LK^2 - kcat1*Km1*LK^2 - AKL*DF*ka3*Km1*LK*LpA + AK*DF*ka3*L*LK*LpA + DF*K*ka3*L*LK*LpA - DF*ka3*Km1*LK^2*LpA - AKL*DF*kb3*L*LpAK + A*DF*ka3*L*LK*LpAK + DF^2*ka3*L*LK*LpA*LpAK + 2*AKL*kb3*Km1*LpAKL - AK*kb3*L*LpAKL - K*kb3*L*LpAKL + K*kcat1*L*LpAKL - A*ka3*Km1*LK*LpAKL + kb3*Km1*LK*LpAKL - kcat1*Km1*LK*LpAKL - DF*ka3*Km1*LK*LpA*LpAKL - DF*kb3*L*LpAK*LpAKL + kb3*Km1*LpAKL^2 - K*kcat7*L*LpAPLp + kcat7*Km1*LK*LpAPLp - K*kcat7*L*LpP + kcat7*Km1*LK*LpP ) / (-(K*L) + Km1*LK)
     #dK 
     du[2] = -(A*K*ka3) + AK*kb3 + AKL*kb3 - A*ka3*LK - K*ka3*LpA - DF*ka3*LK*LpA + kb3*LpAK + kb3*LpAKL 
     #dP 
@@ -32,11 +32,11 @@ function eliminationSystem!(du, u, p, t)
     #dLpAPLp
     du[12] = ka2*DF*APLp*Lp + ka7*DF*Lp*LpAP + ka4*DF*LpA*LpP - kb2*LpAPLp - kb4*LpAPLp - kb7*LpAPLp - kcat7*LpAPLp 
     #dAK
-    du[13] = dL + A*K*ka3 - AK*kb3 - AKL*kb3 + AKL*kcat1 - APLp*kcat7 + A*ka3*LK + kcat1*LK - AK*ka2*Lp - AKL*DF*ka2*Lp + kb2*LpAK + kb2*LpAKL + kcat1*LpAKL - kcat7*LpAPLp - kcat7*LpP 
+    du[13] = du[1] + A*K*ka3 - AK*kb3 - AKL*kb3 + AKL*kcat1 - APLp*kcat7 + A*ka3*LK + kcat1*LK - AK*ka2*Lp - AKL*DF*ka2*Lp + kb2*LpAK + kb2*LpAKL + kcat1*LpAKL - kcat7*LpAPLp - kcat7*LpP 
     #dAP
     du[14] = kb2*LpAP + kb7*APLp + kcat7*APLp + ka4*A*P - kb4*AP - ka2*AP*Lp - ka7*AP*Lp 
     #dAKL
-    du[15] = -dL - AKL*kcat1 + APLp*kcat7 - kcat1*LK - kcat1*LpAKL + kcat7*LpAPLp + kcat7*LpP 
+    du[15] = -du[1] - AKL*kcat1 + APLp*kcat7 - kcat1*LK - kcat1*LpAKL + kcat7*LpAPLp + kcat7*LpP 
     #dAPLp
     du[16] = kb2*LpAPLp + ka7*AP*Lp + ka4*A*LpP - kb4*APLp - kb7*APLp - kcat7*APLp - ka2*DF*APLp*Lp
     nothing
@@ -75,20 +75,23 @@ odeprob = ODEProblem(eliminationSystem!, u0, tspan, p)
 #Validation against the system with no Michaelis-Menten approximations
 include("../UTILITIES/ODESystems.jl")
 
-inplaceprobfull = ODEProblem(fullmodel_ode!, u0, tspan, p)
 
 pMM = zeros(12)
 Km1 = sum(p[2:3])/p[1]
 pMM[1] = Km1
 pMM[2:12] = p[3:13]
-inplaceprobMM = ODEProblem(eliminationSystem!,u0,tspan,pMM)
-import Plots
-usym = [:L => 10^1.6,  :K => 10^0.8, :P => 10^0.6, :A => 10^1.2,:Lp => 0.0, :LpA => 0.0, :LK => 0.1, 
-        :LpP => 0.0, :LpAK => 0.0, :LpAP => 0.0, :LpAKL => 0.0, :LpAPLp => 0.0 ]
+using Plots
+usym = [:L => 10^1.6,  :K => 10^0.8, :P => 10^0.6, :A => 10^1.2,:Lp => 0.1, :LpA => 0.0, :LK => 0.1, 
+        :LpP => 0.1, :LpAK => 0.1, :LpAP => 0.1, :LpAKL => 0.1, :LpAPLp => 0.1 , :AK => 0.0, :AP => 0.0, 
+        :AKL => 0.0, :APLp => 0.0]
 # u0[1] = 3
 # u0[5] = 0
 u0=[i[2] for i in usym]
-solfull = solve(inplaceprobfull)
-solMM = solve(inplaceprobMM)
-Plots.plot(solfull)
-Plots.plot(solMM)
+begin
+inplaceprobfull = ODEProblem(fullmodel_ode!, u0, tspan, p)
+inplaceprobMM = ODEProblem(eliminationSystem!,u0,tspan,pMM)
+solfull = solve(inplaceprobfull, Rosenbrock23(), save_idxs = 1)
+solMM = solve(inplaceprobMM, Rosenbrock23(), save_idxs = 2)
+full = Plots.plot(solfull)
+Plots.plot!(solMM)
+end
