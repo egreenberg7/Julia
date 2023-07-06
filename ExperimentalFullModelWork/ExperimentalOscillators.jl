@@ -13,7 +13,6 @@ oscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], k
                     fit=Float64[],per=Float64[], amp=Float64[],L=Float64[], K=Float64[], P=Float64[], A=Float64[])
 nonoscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[])
 
-
 for df in dfRange
     dfest = df
     for ka7 in kaRange
@@ -56,7 +55,7 @@ for df in dfRange
         println("You are at ka7=$(ka7) and df=$(df)")
     end
     oscFileName = "OscCsvs/Osc_df_$(df).csv"
-    nonoscFileName = "OscCsvs/No_osc_df$(df).csv"
+    nonoscFileName = "OscCsvs/No_osc_df_$(df).csv"
     CSV.write(oscFileName,oscData)
     CSV.write(nonoscFileName,nonoscData)
 end
