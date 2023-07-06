@@ -26,9 +26,9 @@ p = [x[2] for x in psym]
 
     
 #initial condition list
-usym = [:L => 5, :K => 0.1, :P => 0.1, :A => 0.1, :Lp => 0.1, :LpA => 0.0, :LK => 0, 
-        :LpP => 0, :LpAK => 0., :LpAP => 0., :LpAKL => 0., :LpAPLp => 0, :AK => 0, :AP => 0, 
-        :AKL => 0, :APLp => 0]
+usym = [:L => 5, :K => 0.1, :P => 0.1, :A => 0.1, :Lp => 0., :LpA => 0.0, :LK => 0., 
+        :LpP => 0., :LpAK => 0., :LpAP => 0., :LpAKL => 0., :LpAPLp => 0., :AK => 0., :AP => 0., 
+        :AKL => 0., :APLp => 0.]
 u0 = [x[2] for x in usym]
 
 #Reaction network
@@ -82,23 +82,30 @@ Krange = 10.0 .^ (-3:2)
 Prange = 10.0 .^ (-3:2)
 Arange = 10.0 .^ (-2:2)
 
-u0combos = Array{Float64}(undef, length(Lrange)*length(Krange)*length(Arange)*length(Prange),4)
+ 
 
 #Set up array of initial conditions that will be tested in advance for ease of later code
-count = 1
-for L in Lrange
-    for K in Krange
-        for P in Prange
-            for A in Arange
-                u0combos[count, 1] = L
-                u0combos[count, 2] = K
-                u0combos[count, 3] = P
-                u0combos[count, 4] = A
-                count+=1
+function makeCombos(Lrange, Krange, Prange, Arange)
+    arr = Array{Float64}(undef, length(Lrange)*length(Krange)*length(Arange)*length(Prange),4)
+    count = 1
+    for L in Lrange
+        for K in Krange
+            for P in Prange
+                for A in Arange
+                    arr[count, 1] = L
+                    arr[count, 2] = K
+                    arr[count, 3] = P
+                    arr[count, 4] = A
+                    count += 1
+                end
             end
         end
     end
+    return arr
 end
+
+u0combos = makeCombos(Lrange, Krange, Prange, Arange)
+
 numU0combos = length(u0combos[:,1])
 
 #TODO Set to const once ranges finalized
