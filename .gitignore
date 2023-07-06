@@ -1,0 +1,6 @@
+*.png
+*.json
+*.vscode
+.DS_Store
+*.csv
+*.toml
