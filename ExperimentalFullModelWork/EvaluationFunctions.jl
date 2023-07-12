@@ -83,3 +83,47 @@ function getPerAmp(sol::ODESolution, indx_max::Vector{Int}, vals_max::Vector{Flo
 
     return mean(pers), mean(amps)
 end
+
+"""
+Returns true if an ODE solution has more than 3 local maxima, and the height of the middle peak varies from
+the height of the last peak by less than 5%.
+- `Y::ODESolution` ODESolution that you are testing
+"""
+function hasPeaks(Y::ODESolution)
+    peaks = findmaxima(Y.u, 10)[2]
+    numPeaks = length(peaks)
+    if numPeaks > 3 && abs((peaks[div(numPeaks,2)]-peaks[end])) / peaks[div(numPeaks,2)] < 0.05 
+        return true
+    else
+        return false
+    end
+end
+
+function peaksClassifier(sol::ODESolution)
+    if(isSteady(sol) || !hasPeaks(sol))
+        return [1.0,0.0,0.0]
+    end
+    #* Compute the period and amplitude
+    period, amplitude = getPerAmp(sol, time_peakindexes, time_peakvals)
+    return [-1.0, period, amplitude]
+end
+
+function peaksClassifierNoErrors(sol::ODESolution)
+    Y = nothing
+    try 
+        if sol.retcode in (ReturnCode.Unstable, ReturnCode.MaxIters) || any(x==1 for array in isnan.(sol) for x in array) || any(x==1 for array in isless.(sol, 0.0) for x in array)
+            return [1.0, 0.0, 0.0]
+        end
+    catch e 
+        if isa(e, DomainError) #catch domain errors
+            return [1.0,0.0,0.0]
+        else
+            rethrow(e) #rethrow other errors
+        end
+    end
+    if !(sol.retcode in (ReturnCode.Success, ReturnCode.Default)) #I added this
+        println("FAILURE")
+        return [1.0,0.0,0.0]
+    end
+    return peaksClassifier(sol)
+end

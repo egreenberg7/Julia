@@ -50,7 +50,8 @@ function PlotSolutions(osc_df)
 end
 
 """
-Makes 3d plots of points with oscillatory solutions, maybe eventually with colors given by period and amplitude
+Makes 3d plots of points with oscillatory solutions by looping over ka7,
+    maybe eventually with colors given by period and amplitude
 """
 function PlotOscillatoryRegime(df)
     for ka7 in kaRange
