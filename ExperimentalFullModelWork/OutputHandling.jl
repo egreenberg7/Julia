@@ -1,6 +1,7 @@
 using Plots
 using DataFrames
 using CSV
+using Interact
 include("Constants.jl")
 include("EvaluationFunctions.jl")
 
@@ -34,13 +35,34 @@ Creates plots of all solutions and their Fourier transforms for a dataframe of o
 in directory sum_plots
 - `osc_df` Dataframe of oscillatory solutions
 """
-function PlotSolutions(osc_df)
-    for i in 1:size(osc_df)[1]
+function PlotSolutions(osc_df, numsols = size(osc_df)[1])
+    for i in 1:numsols
         cursol = entryToSol(osc_df, i)
         solPlot = plot(cursol, title="L vs t")
         fftSolPlot = plot((2:length(cursol.t)/2 + 1),(abs.(rfft(cursol.u)))[2:end], title="Fourier Transform")
         plot(solPlot,fftSolPlot, layout=(2,1))
         savefig("Someplots/$i.png")
+    end
+end
+
+"""
+Rewrites CSV to only have one df value; useful for initial implementation where CSVs just appended new values as DF increased
+Also good to quickly read in one of the later files.
+- `dfval` df value that dataframe should have 
+"""
+function isolateDF(dfval)
+    my_df = DataFrame(CSV.File("ExperimentalFullModelWork/OscCsvs/Osc_df_$(dfval).csv"))
+    booldf =  my_df[:,:DF].==dfval
+    isolated_df = my_df[booldf, :]
+    return isolated_df
+end
+
+""""
+Overwrites alllcsv files with isolatedDF files.
+"""
+function isolateDFfiles(dfRange=dfRange)
+    for df in dfRange
+        CSV.write("ExperimentalFullModelWork/OscCsvs/Osc_df_$(df).csv",isolateDF(df))
     end
 end
 
@@ -59,7 +81,9 @@ function PlotOscillatoryRegime(df, kaRange = kaRange, toSave=false)
         curdf = df[boolka7, :]
         curplot = PlotNoka7WithShadow(curdf, "log(ka7) = $(roundedka7)")
         my_plots[ka7] = curplot
-        savefig(curplot, "Someplots/ka7=$(roundedka7).png")
+        if toSave
+            savefig(curplot, "Users/ezragreenberg/Julia/ExperimentalFullModelWork/Someplots/ka7=$(roundedka7).png")
+        end
     end
     return my_plots
 end
@@ -79,22 +103,31 @@ function PlotNoka7WithShadow(df, title)
     #Plot coordinates to find limits for projections
     myplot = Plots.scatter(x,y,z)
 
+    #Make it so there are set axis sizes based on the ranges, can be commented out
+    xlims!((log10.((kaRange[1], kaRange[end]))))
+    ylims!(log10.((kbRange[1], kbRange[end])))
+    zlims!(log10.((kaRange[1], kaRange[end])))
+
     #Create series from the graph lims to create projections
-    #TODO Make sure that we do not have overlapping points, set colors to be good, set marker size also
     numElements = length(x)
     xyPlane = fill(zlims(myplot)[1], numElements)
     xzPlane = fill(ylims(myplot)[2], numElements)
     yzPlane = fill(xlims(myplot)[1], numElements)
 
-    final_plot = Plots.scatter(x, y, xyPlane, markershape=:xcross, mc=:blue, msa=0.5, ma=0.5)
-    Plots.scatter!(x, xzPlane, z, markershape=:xcross,mc=:blue,msa=0.5,ma=0.5)
-    Plots.scatter!(yzPlane, y, z, markershape=:xcross,mc=:blue,msa=0.5,ma=0.5)
+    final_plot = Plots.scatter(x, y, xyPlane, markershape=:xcross, mc=:blue, msa=0.5, ma=0.5, ms = 1)
+    Plots.scatter!(x, xzPlane, z, markershape=:xcross,mc=:blue,msa=0.5,ma=0.5, ms = 1)
+    Plots.scatter!(yzPlane, y, z, markershape=:xcross,mc=:blue,msa=0.5,ma=0.5, ms = 1)
 
     #Add labels
     Plots.scatter!(xlabel="log(ka1)",ylabel="log(kb1)",zlabel="log(ka4)", legend=:none, title=title)
 
     #Replot coordinates to make sure they are on top of projected points
-    Plots.scatter!(x,y,z,mc=:black)
+    #Plots.scatter!(x,y,z,mc=:black, ms = 2)
+    #Make it so there are set axis sizes based on the ranges, can be commented out
+    xlims!((log10.((kaRange[1], kaRange[end]))))
+    ylims!(log10.((kbRange[1], kbRange[end])))
+    zlims!(log10.((kaRange[1], kaRange[end])))
+
     return final_plot
 end
 
@@ -137,4 +170,11 @@ function makeOscCsvPlots(dfRange=dfRange, kaRange=kaRange)
     return plot_arr
 end
 
-makeOscCsvPlots()
+"""
+Makes interactive graph with slider to visualize all CSV data
+"""
+function oscPlotWithSlider(plot_dict; dfRange = dfRange, kaRange = kaRange)
+    @manipulate for df=dfRange, ka7=kaRange
+        Plots.plot(plot_dict[df][ka7])
+    end
+end
