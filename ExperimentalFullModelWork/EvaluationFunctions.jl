@@ -104,6 +104,7 @@ function peaksClassifier(sol::ODESolution)
         return [1.0,0.0,0.0]
     end
     #* Compute the period and amplitude
+    time_peakindexes, time_peakvals = findmaxima(sol.u,5) #* get the times of the peaks in the fft
     period, amplitude = getPerAmp(sol, time_peakindexes, time_peakvals)
     return [-1.0, period, amplitude]
 end
@@ -122,7 +123,7 @@ function peaksClassifierNoErrors(sol::ODESolution)
         end
     end
     if !(sol.retcode in (ReturnCode.Success, ReturnCode.Default)) #I added this
-        println("FAILURE")
+        #println("FAILURE")
         return [1.0,0.0,0.0]
     end
     return peaksClassifier(sol)

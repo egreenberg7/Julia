@@ -73,16 +73,27 @@ const tspan = (0., 100.)
 const prob = ODEProblem(fullrn, u0, tspan, p)
 
 
-dfRange = 10.0 .^ (-1:3) #exponential range from 0.1 to 1000
-kaRange = 10.0 .^ (-3:1)
-kbRange = 10.0 .^ (-3:3)
+#RANGES THAT VARY BY POWER OF 10
+dfRange = 10.0 .^ ((-2:6) ./2) #exponential range from 0.1 to 1000
+kaRange = 10.0 .^ ((-6:2) ./2)
+kbRange = 10.0 .^ ((-6:6) ./2)
 
 Lrange = 10.0 .^ (-2:2)
 Krange = 10.0 .^ (-3:2)
 Prange = 10.0 .^ (-3:2)
 Arange = 10.0 .^ (-2:2)
 
- 
+#=
+#3 times resolution as above
+dfRange = 10.0 .^ ((-3:9) ./3) #exponential range from 0.1 to 1000
+kaRange = 10.0 .^ ((-3:9) ./3)
+kbRange = 10.0 .^ ((-3:9) ./3)
+
+Lrange = 10.0 .^ ((-6:6)./3)
+Krange = 10.0 .^ ((-9:6)./3)
+Prange = 10.0 .^ ((-9:6)./3)
+Arange = 10.0 .^ ((-6:6)./3)
+=#
 
 #Set up array of initial conditions that will be tested in advance for ease of later code
 function makeCombos(Lrange, Krange, Prange, Arange)
