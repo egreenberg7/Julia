@@ -9,11 +9,13 @@ using FFTW
 include("EvaluationFunctions.jl")
 include("Constants.jl")
 
-oscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[],
-                    fit=Float64[],per=Float64[], amp=Float64[],L=Float64[], K=Float64[], P=Float64[], A=Float64[])
-nonoscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[])
+
 function makeSolutionCSVs(oscData, nonoscData)
     for df in dfRange
+        #Initialize new dataframe at each df value
+        oscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[],
+                    fit=Float64[],per=Float64[], amp=Float64[],L=Float64[], K=Float64[], P=Float64[], A=Float64[])
+        nonoscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[])
         dfest = df
         for ka7 in kaRange
             ka7est = ka7
