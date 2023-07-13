@@ -128,3 +128,50 @@ function peaksClassifierNoErrors(sol::ODESolution)
     end
     return peaksClassifier(sol)
 end
+
+#TODO Determine tspanInc and maximum number of iterations
+#TODO Determine minimum prominence for peaks
+#TODO Determine what needs to be returned
+#TODO Implement isDamped
+#TODO Finalize isSteady conditions
+#TODO Refactor code to minimize calls to findmaxima
+#TODO Find different between findmaxima and argmaxima
+#TODO Have a fun time :)
+function adaptiveSolve(prob::ODEProblem, u0, tspanInc, p)
+    num_iters = 1    
+    while num_iters < 6
+        sol = solve(remake(prob, u0=u0, tspan=(tspanInc * (num_iters - 1), tspanInc * num_iters), p=p), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+        #TODO Check this catches everything in eval fitness catch errors
+        if !(sol.retcode in (ReturnCode.Success, ReturnCode.Default)) #I added this
+            return [1.0,0.0,0.0]
+        elseif (x -> x > sol.u[0] in sol.u) #If lipids not conserved due to numerical issues
+            return [1.5, 0.0, 0.0]
+        elseif isSteady(sol; time = tspanInc*num_iters*0.8) #Check if last 20% of solution is steady
+            return [2.0, 0.0, 0.0]
+        else
+            maxindices, maxima = findmaxima(sol.u, 10)
+            if(length(maxima) > 4) #Must have at least 5 local maxima
+                peaks, proms = peakproms(maxima, sol.u; minprom = nothing)
+                if(length(peaks) > 4) #Check threshold for prominence to be valid maxima
+                    if(isDamped(proms)) 
+                        return [3.0,0.0,0.0]
+                    end
+                else
+                    per, amp = getPerAmp(sol, maxindices, maxima)
+                    return [-1.0, per, amp]
+                end
+            end
+        end 
+    end
+end
+
+#TODO Implement boolean classifier to determine if list of peaks is damped or not
+"""
+Determines if a given set of peak prominences represents a damped oscillation. Specifically,
+it compares the median prominence with the last prominence and the following three peaks
+"""
+#TODO ADD Tolerance; isapprox
+function isDamped(proms)
+    midpoint = div(length(proms),2) 
+    return 1.02 * proms[midpoint] > proms[end] && (proms[midpoint] > max(proms[(midpoint + 1):(midpoint+3)]))
+end
