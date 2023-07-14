@@ -1,4 +1,5 @@
 using DifferentialEquations
+using DiffEqCallbacks
 using Statistics
 using Peaks
 using FFTW
@@ -129,49 +130,79 @@ function peaksClassifierNoErrors(sol::ODESolution)
     return peaksClassifier(sol)
 end
 
-#TODO Determine tspanInc and maximum number of iterations
-#TODO Determine minimum prominence for peaks
-#TODO Determine what needs to be returned
+#// TODO Determine tspanInc and maximum number of iterations
+#// TODO Determine minimum prominence for peaks
+#// TODO Determine what needs to be returned
 #TODO Implement isDamped
 #TODO Finalize isSteady conditions
-#TODO Refactor code to minimize calls to findmaxima
-#TODO Find different between findmaxima and argmaxima
+#// TODO Refactor code to minimize calls to findmaxima
+#// TODO Find different between findmaxima and argmaxima
 #TODO Have a fun time :)
-function adaptiveSolve(prob::ODEProblem, u0, tspanInc, p)
-    num_iters = 1    
-    while num_iters < 6
-        sol = solve(remake(prob, u0=u0, tspan=(tspanInc * (num_iters - 1), tspanInc * num_iters), p=p), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
-        #TODO Check this catches everything in eval fitness catch errors
-        if !(sol.retcode in (ReturnCode.Success, ReturnCode.Default)) #I added this
-            return [1.0,0.0,0.0]
-        elseif (x -> x > sol.u[0] in sol.u) #If lipids not conserved due to numerical issues
-            return [1.5, 0.0, 0.0]
-        elseif isSteady(sol; time = tspanInc*num_iters*0.8) #Check if last 20% of solution is steady
-            return [2.0, 0.0, 0.0]
-        else
-            maxindices, maxima = findmaxima(sol.u, 10)
-            if(length(maxima) > 4) #Must have at least 5 local maxima
-                peaks, proms = peakproms(maxima, sol.u; minprom = nothing)
-                if(length(peaks) > 4) #Check threshold for prominence to be valid maxima
-                    if(isDamped(proms)) 
-                        return [3.0,0.0,0.0]
-                    end
-                else
-                    per, amp = getPerAmp(sol, maxindices, maxima)
-                    return [-1.0, per, amp]
-                end
-            end
-        end 
-    end
+"""
+Given an ODEProblem and parameters, it will first try to classify the solution as oscillatory or not using `finalClassifier`
+by integrating from `0` to `shortSpan`. If unsuccessful, it will integrate again from `0` to `longSpan` and then returns 
+the values from `finalClassifier` given on this second run.
+- `prob` ODEProblem to solve
+- `u0` Initial concentrations
+- `shortSpan` time on first integration run
+- `longSpan` time on second integration run
+- `p` Parameter values
+"""
+function adaptiveSolve(prob::ODEProblem, u0, shortSpan, longSpan, p)
+    num_iters = 1
+    sol = solve(remake(prob, u0=u0, tspan=(0.0, shortSpan), p=p), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false, callback=TerminateSteadyState())
+    ret1 = finalClassifier(sol, shortSpan)#, u0[1])
+    if ret1[1] != 4.0
+        return ret1
+    else
+        sol = solve(remake(prob, u0=u0, tspan=(0.0, longSpan), p=p), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false, callback=TerminateSteadyState())
+        return finalClassifier(sol, longSpan)#, u0[1])
+    end 
 end
 
-#TODO Implement boolean classifier to determine if list of peaks is damped or not
+"""
+Evaluates the solution to a differential equation with the following return values:
+- `[-tspan, period, amplitude]` The solution was classified as oscillatory when integrated from `0` to `tspan,` the period and amplitude are also returned
+- `[1.0, 0.0, 0.0]` Retcode is a failure 
+- `[1.1, 0.0, 0.0]` Retcode is `:Terminated` (presumable becase `TerminateSteadyState` was used from `DiffEqCallbacks`)
+- `[1.5, 0.0, 0.0]` A lipid concentration higher than the initial concentration `L0` was found in the solution (mass conservation broken), indicating numerical errors
+- `[2.0, 0.0, 0.0]` The solution was marked as steady by the `isSteady` function
+- `[3.0, 0.0, 0.0]` The solution was marked as damped oscillations by the `isDamped` function
+- `[4.0, 0.0, 0.0]` None of the above applied
+"""
+function finalClassifier(sol::ODESolution, tspan)#, L0)
+    if !SciMLBase.successful_retcode(sol) #sol.retcode in (ReturnCode.Unstable, ReturnCode.InitialFailure, ReturnCode.ConvergenceFailure, ReturnCode.Failure)
+        return [1.0,0.0,0.0]
+    elseif sol.retcode == ReturnCode.Terminated
+        return [1.1,0.0,0.0]
+    elseif findfirst(x -> x > sol.u[1], sol.u) !== nothing #If lipids not conserved due to numerical issues
+        return [1.5, 0.0, 0.0]
+    elseif isSteady(sol; time = tspan * 0.8) #Check if last 20% of solution is steady
+        return [2.0, 0.0, 0.0]
+    else
+        maxindices, maxima = findmaxima(sol.u, 10)
+        if length(maxima) > 4 #Must have at least 5 local maxima
+            peaks, proms = peakproms(maxindices, sol.u; minprom = sol.u[1] * 0.03)
+            if(length(peaks) > 4) #Check threshold for prominence to be valid maxima
+                if isDamped(proms)
+                    return [3.0,0.0,0.0]
+                end
+            else
+                per, amp = getPerAmp(sol, maxindices, maxima)
+                return [-tspan, per, amp]
+            end
+        end
+    end
+    return [4.0,0.0,0.0]
+end
+
+
 """
 Determines if a given set of peak prominences represents a damped oscillation. Specifically,
-it compares the median prominence with the last prominence and the following three peaks
+it compares the median prominence with the last prominence times 1.02 and the maximum prominence of the three peaks after the median
+- `proms` vector of peak prominences from `peakproms` function call
 """
-#TODO ADD Tolerance; isapprox
 function isDamped(proms)
     midpoint = div(length(proms),2) 
-    return 1.02 * proms[midpoint] > proms[end] && (proms[midpoint] > max(proms[(midpoint + 1):(midpoint+3)]))
+    return proms[midpoint] > 1.02 * proms[end] && (proms[midpoint] > maximum(proms[(midpoint + 1):(midpoint+3)]))
 end

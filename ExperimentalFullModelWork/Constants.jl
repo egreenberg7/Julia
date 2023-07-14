@@ -74,10 +74,12 @@ const prob = ODEProblem(fullrn, u0, tspan, p)
 
 
 #RANGES THAT VARY BY POWER OF 10
-dfRange = 10.0 .^ ((-2:6) ./2) #exponential range from 0.1 to 1000
+#// TODO DIMENSIONALITY CAN GO TO 10,000
+dfRange = 10.0 .^ ((-2:8) ./2) #exponential range from 0.1 to 1000
 kaRange = 10.0 .^ ((-6:2) ./2)
 kbRange = 10.0 .^ ((-6:6) ./2)
 
+#TODO Double resolution
 Lrange = 10.0 .^ (-2:2)
 Krange = 10.0 .^ (-3:2)
 Prange = 10.0 .^ (-3:2)
