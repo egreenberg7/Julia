@@ -71,7 +71,7 @@ const shortSpan = (0.0, 100.0)
 const longSpan = (0.0, 600.0)
 
 #Set up ODE problem
-const prob = ODEProblem(fullrn, u0, tspan, p)
+const prob = ODEProblem(fullrn, u0, shortSpan, p)
 
 
 #RANGES THAT VARY BY POWER OF 10
