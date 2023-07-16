@@ -66,8 +66,9 @@ const fullrn = @reaction_network fullrn begin
     kcat7, APLp --> L + AP #dephosphorylation of lipid
 end
 
-#Time bounds for ODE problem #TODO make adaptive integration range
-const tspan = (0., 100.)
+#Time bounds for ODE problem #// TODO make adaptive integration range
+const shortSpan = (0.0, 100.0)
+const longSpan = (0.0, 600.0)
 
 #Set up ODE problem
 const prob = ODEProblem(fullrn, u0, tspan, p)

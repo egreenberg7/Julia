@@ -9,8 +9,11 @@ using FFTW
 include("EvaluationFunctions.jl")
 include("Constants.jl")
 
+dfRange = 10.0 .^ (-1:4) #exponential range from 0.1 to 1000
+kaRange = 10.0 .^ (-3:1) 
+kbRange = 10.0 .^ (-3:3) 
 
-function makeSolutionCSVs(oscData, nonoscData)
+function makeSolutionCSVs()
     for df in dfRange
         #Initialize new dataframe at each df value
         oscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[],
@@ -39,10 +42,8 @@ function makeSolutionCSVs(oscData, nonoscData)
                         for i in 1:numU0combos
                             curU0 = u0combos[i,:]
                             u0[1:4] = curU0[1:4]
-                            currentSol = solve(remake(prob, u0=u0, p=p), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
-                            #costPerAmp = eval_fitness_catcherrors(currentSol)
-                            costPerAmp = peaksClassifierNoErrors(currentSol)
-                            if(costPerAmp[1] < 0)
+                            costPerAmp = adaptiveSolve(prob,u0,shortSpan,longSpan,p)
+                            if(costPerAmp[1] < 0.0)
                                 oscFound+=1
                                 if oscFound >= 3
                                     push!(oscData, Dict(:DF => df, :ka7 => ka7, :ka4 => ka4, :ka1 => ka1, :kb1 => kb1,
@@ -67,7 +68,7 @@ function makeSolutionCSVs(oscData, nonoscData)
     end
 end
 
-makeSolutionCSVs(oscData, nonoscData)
+makeSolutionCSVs()
 
 
                             
