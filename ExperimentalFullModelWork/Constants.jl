@@ -67,11 +67,11 @@ const fullrn = @reaction_network fullrn begin
 end
 
 #Time bounds for ODE problem #// TODO make adaptive integration range
-const shortSpan = (0.0, 100.0)
-const longSpan = (0.0, 600.0)
+const shortSpan = 100.0
+const longSpan = 600.0
 
 #Set up ODE problem
-const prob = ODEProblem(fullrn, u0, shortSpan, p)
+const prob = ODEProblem(fullrn, u0, (0.0, shortSpan), p)
 
 
 #RANGES THAT VARY BY POWER OF 10
