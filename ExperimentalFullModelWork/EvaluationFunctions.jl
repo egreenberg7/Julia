@@ -60,13 +60,13 @@ Return codes from `finalClassifier` are as follows:
 - `[3.0, 0.0, 0.0]` The solution was marked as damped oscillations by the `isDamped` function
 - `[4.0, 0.0, 0.0]` None of the above applied
 """
-function adaptiveSolve(prob::ODEProblem, u0, shortSpan, longSpan, p)
-    sol = solve(remake(prob, u0=u0, tspan=(0.0, shortSpan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=1, maxiters=200 * shortSpan, verbose=false, callback=TerminateSteadyState(1e-8, 1e-12))
+function adaptiveSolve(prob::ODEProblem, u0, shortSpan, longSpan, p; abstol = 1e-8, reltol=1e-12)
+    sol = solve(remake(prob, u0=u0, tspan=(0.0, shortSpan), p=p), Rodas4(), abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=200 * shortSpan, verbose=false, callback=TerminateSteadyState(1e-8, 1e-12))
     ret1 = finalClassifier(sol, shortSpan)
     if ret1[1] != 4.0
         return ret1
     else
-        sol = solve(remake(prob, u0=u0, tspan=(0.0, longSpan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=1, maxiters=200 * longSpan, verbose=false, callback=TerminateSteadyState(1e-8,1e-12))
+        sol = solve(remake(prob, u0=u0, tspan=(0.0, longSpan), p=p), Rodas4(), abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=200 * longSpan, verbose=false, callback=TerminateSteadyState(1e-8,1e-12))
         return finalClassifier(sol, longSpan)
     end 
 end

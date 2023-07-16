@@ -12,7 +12,7 @@ Converts row in oscillatory solution dataframe to an ODESolution
 - `df` Dataframe of oscillatory solutions
 - `row` Row of dataframe to solve
 """
-function entryToSol(df, row)
+function entryToSol(df, row; tspan = shortSpan)
     currow = df[row,:]
     u0[1] = currow[:L]
     u0[2] = currow[:K]
@@ -27,7 +27,7 @@ function entryToSol(df, row)
                             :ka3 => ka3exp, :kb3 => kb3exp, :ka4 => ka4est, :kb4 => Kd4exp * ka4est, :ka7 => ka7est, 
                             :kb7 => Km7exp * ka7est - kcat7exp, :kcat7exp => 85.3, :y => dfest]
     p = [x[2] for x in psym]
-    return solve(remake(prob, u0=u0, p=p), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+    return solve(remake(prob, u0=u0, tspan=(0.0, tspan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=1, maxiters=200 * tspan, verbose=false, callback=TerminateSteadyState(1e-8, 1e-12))
 end
 
 """
