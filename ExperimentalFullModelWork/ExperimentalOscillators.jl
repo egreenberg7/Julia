@@ -1,11 +1,5 @@
-using DifferentialEquations
-using Plots
-using Catalyst
 using DataFrames
 using CSV
-using Statistics
-using Peaks
-using FFTW
 include("EvaluationFunctions.jl")
 include("Constants.jl")
 
@@ -15,11 +9,16 @@ kbRange = 10.0 .^ (-3:3)
 
 function makeSolutionCSVs()
     for df in dfRange
+        println("#################")
+        println("df = $(df)")
+        println("#################")
+        flush(stdout)
         #Initialize new dataframe at each df value
         oscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[],
                     fit=Float64[],per=Float64[], amp=Float64[],L=Float64[], K=Float64[], P=Float64[], A=Float64[])
         nonoscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[])
         dfest = df
+        numericalErrorCount = 0
         for ka7 in kaRange
             ka7est = ka7
             println("You are at ka7=$(ka7) and df=$(df)")
@@ -43,7 +42,8 @@ function makeSolutionCSVs()
                             curU0 = u0combos[i,:]
                             u0[1:4] = curU0[1:4]
                             costPerAmp = adaptiveSolve(prob,u0,shortSpan,longSpan,p)
-                            if(costPerAmp[1] < 0.0)
+                            retcode = costPerAmp[1]
+                            if retcode < 0.0
                                 oscFound+=1
                                 if oscFound >= 3
                                     push!(oscData, Dict(:DF => df, :ka7 => ka7, :ka4 => ka4, :ka1 => ka1, :kb1 => kb1,
@@ -51,6 +51,8 @@ function makeSolutionCSVs()
                                                         :L => curU0[1],:K => curU0[2],:P => curU0[3],:A => curU0[4]))
                                     break
                                 end
+                            elseif retcode in [1.0, 1.5]
+                                numericalErrorCount += 1
                             end
                         end
                         if oscFound < 3
@@ -61,6 +63,8 @@ function makeSolutionCSVs()
                 end
             end
         end
+        println("At df = $(df), $(numericalErrorCount) numerical errors occurred.")
+        flush(stdout)
         oscFileName = "/Users/ezragreenberg/Julia/ExperimentalFullModelWork/OscCsvs/Osc_df_$(df).csv"
         nonoscFileName = "/Users/ezragreenberg/Julia/ExperimentalFullModelWork/OscCsvs/No_osc_df_$(df).csv"
         CSV.write(oscFileName,oscData)
