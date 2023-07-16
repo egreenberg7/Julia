@@ -60,7 +60,7 @@ longspan = 600.0
 #solve the reduced ODEs
 prob = ODEProblem(fullrn, u0, shortspan, p)
 
-function testClassifier(numIterations; saveCSV = true, outputdirectory = "Users/ezragreenberg/Julia/Someplots/",filename="mytest.csv")
+function testClassifier(numIterations; saveCSV = true, outputdirectory = "/Users/ezragreenberg/Julia/Someplots/",filename="mytest1.csv")
     #df = DataFrame(u0=Vector{Float64}[], p=Vector{Float64}[], retcode=Float64[], per=Float64[], amp=Float64[])
     #CSV of array gets read in as string, will have to generalize this later
     df = DataFrame(L=Float64[],K=Float64[],P=Float64[],A=Float64[], retcode=Float64[], per=Float64[], amp=Float64[])
@@ -76,6 +76,9 @@ function testClassifier(numIterations; saveCSV = true, outputdirectory = "Users/
             println("$i iterations completed")
         end
     end
+    if saveCSV
+        CSV.write(outputdirectory*filename, df)
+    end
     return df
 end
 
@@ -90,12 +93,13 @@ function entryToSol(df, row)
     u0[2] = currow[:K]
     u0[3] = currow[:P]
     u0[4] = currow[:A]
-    return solve(remake(prob, u0=u0, tspan=(0,longspan)), Rosenbrock23(), saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
+    return solve(remake(prob, u0=u0, tspan=(0,longspan)), RadauIIA5(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=1, maxiters=10000, verbose=false)
 end
 
 function PlotSolutions(osc_df, numsols = size(osc_df)[1])
     for i in 1:numsols
         cursol = entryToSol(osc_df, i)
+        println(cursol.retcode)
         solPlot = plot(cursol, title="L vs t")
         fftSolPlot = plot((2:length(cursol.t)/2 + 1),(abs.(rfft(cursol.u)))[2:end], title="Fourier Transform")
         plot(solPlot,fftSolPlot, layout=(2,1))
@@ -110,4 +114,3 @@ OscilatorsInNonTerminated = [100, 102, 104, 105, 108, 109, 111, 112, 113, 115, 1
 
 CSV.write("/Users/ezragreenberg/Julia/Someplots/"*"mytest.csv", mydf)
 
-newdf = DataFrame(CSV.File("/Users/ezragreenberg/Julia/Someplots/"*"mytest.csv"))
