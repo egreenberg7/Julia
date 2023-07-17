@@ -1,5 +1,5 @@
 using DifferentialEquations
-using DiffEqCallbacks
+#using DiffEqCallbacks
 using Statistics
 using Peaks
 
@@ -60,13 +60,13 @@ Return codes from `finalClassifier` are as follows:
 - `[3.0, 0.0, 0.0]` The solution was marked as damped oscillations by the `isDamped` function
 - `[4.0, 0.0, 0.0]` None of the above applied
 """
-function adaptiveSolve(prob::ODEProblem, u0, shortSpan, longSpan, p; abstol = 1e-8, reltol=1e-12)
-    sol = solve(remake(prob, u0=u0, tspan=(0.0, shortSpan), p=p), Rodas4(), abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=200 * shortSpan, verbose=false, callback=TerminateSteadyState(1e-8, 1e-12))
+function adaptiveSolve(prob::ODEProblem, u0, shortSpan, longSpan, p; abstol = 1e-6, reltol=1e-8)
+    sol = solve(remake(prob, u0=u0, tspan=(0.0, shortSpan), p=p), Rodas4(), abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=150.0 * shortSpan, verbose=false)#, callback=TerminateSteadyState(1e-8, 1e-12)
     ret1 = finalClassifier(sol, shortSpan)
     if ret1[1] != 4.0
         return ret1
     else
-        sol = solve(remake(prob, u0=u0, tspan=(0.0, longSpan), p=p), Rodas4(), abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=200 * longSpan, verbose=false, callback=TerminateSteadyState(1e-8,1e-12))
+        sol = solve(remake(prob, u0=u0, tspan=(0.0, longSpan), p=p), Rodas4(), abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=150.0 * longSpan, verbose=false)#, callback=TerminateSteadyState(1e-8,1e-12)
         return finalClassifier(sol, longSpan)
     end 
 end
@@ -85,8 +85,8 @@ Evaluates the solution to a differential equation with the following return valu
 function finalClassifier(sol::ODESolution, tspan)
     if !(SciMLBase.successful_retcode(sol) || sol.retcode == ReturnCode.MaxIters) #sol.retcode in (ReturnCode.Unstable, ReturnCode.InitialFailure, ReturnCode.ConvergenceFailure, ReturnCode.Failure)
         return [1.0,0.0,0.0]
-    elseif sol.retcode == ReturnCode.Terminated
-        return [1.1,0.0,0.0]
+    #elseif sol.retcode == ReturnCode.Terminated
+        #return [1.1,0.0,0.0]
     elseif findfirst(x -> x > sol.u[1], sol.u) !== nothing #If lipids not conserved due to numerical issues
         return [1.5, 0.0, 0.0]
     elseif isSteady(sol) #Check if last 20% of solution is steady
