@@ -50,7 +50,7 @@ function makeSolutionCSVs(dfRange=dfRange, ka7minExponent=ka7minExponent, ka7max
         println(progressFile, "#################")
         flush(progressFile)
         #Initialize new dataframe at each df value
-        count = 0
+        count = 1
         numericalErrorCount = 0
         for ka7est in kaRange[ka7minExponent:ka7maxExponent]
             println(progressFile, "You are at ka7=$(ka7est).")
