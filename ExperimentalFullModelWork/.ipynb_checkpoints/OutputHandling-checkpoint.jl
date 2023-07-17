@@ -2,7 +2,6 @@ using Plots
 using DataFrames
 using CSV
 using Interact
-using FFTW
 include("Constants.jl")
 include("EvaluationFunctions.jl")
 

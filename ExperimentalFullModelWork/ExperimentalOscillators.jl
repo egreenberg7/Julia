@@ -5,9 +5,23 @@ include("Constants.jl")
 
 dfRange = 10.0 .^ (-1:4) #exponential range from 0.1 to 1000
 kaRange = 10.0 .^ (-3:1) 
-kbRange = 10.0 .^ (-3:3) 
+kbRange = 10.0 .^ (-3:3)
+
+function setOutputDir()
+    mkdir("osc_dfs")
+    cd("osc_dfs")
+
+    ranges = [dfRange, kaRange, kbRange, Lrange, Krange, Prange, Arange]
+    rangenames = ["dfRange", "kaRange", "kbRange", "Lrange", "Krange", "Prange", "Arange"]
+    open("README", "a") do io
+        for i in zip(rangenames, ranges)
+            println(io, "$(i[1]): ($(i[2][1]),$(i[2][end])) with $(length(i[2])) elements")
+        end
+    end      
+end
 
 function makeSolutionCSVs()
+    setOutputDir()
     for df in dfRange
         println("#################")
         println("df = $(df)")
@@ -41,7 +55,7 @@ function makeSolutionCSVs()
                         for i in 1:numU0combos
                             curU0 = u0combos[i,:]
                             u0[1:4] = curU0[1:4]
-                            costPerAmp = adaptiveSolve(prob,u0,shortSpan,longSpan,p)
+                            costPerAmp = adaptiveSolve(prob,u0,shortSpan,longSpan,p; abstol=1e-8,reltol=1e-6)
                             retcode = costPerAmp[1]
                             if retcode < 0.0
                                 oscFound+=1
