@@ -14,9 +14,9 @@ Make directory where output CSVs where be stored. Also makes README
 file detialing ranges used on the program run and tests that CSVs can successfully
 be created.
 """
-function setOutputDir(df=dfRange[1])
-    mkdir("$(df)DF")
-    cd("($df)DF")
+function setOutputDir(df=dfRange[1],ka7=ka7minExponent)
+    mkdir("$(df)DF_$(ka7)ka7min")
+    cd("$(df)DF_$(ka7)ka7min")
     mkdir("AllData")
     ranges = [dfRange, kaRange[ka7minExponent:ka7maxExponent], kaRange, kbRange, Lrange, Krange, Prange, Arange]
     rangenames = ["dfRange", "ka7Range", "kaRange", "kbRange", "Lrange", "Krange", "Prange", "Arange"]
