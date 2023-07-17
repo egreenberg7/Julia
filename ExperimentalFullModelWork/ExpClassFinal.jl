@@ -5,7 +5,7 @@ include("FinalConstants.jl")
 
 
 #This file takes in the value of df and the minimum and maximum of the ka7 range you are exploring.
-const dfRange = [parse(Float64, ARGS[1])]
+dfRange = [parse(Float64, ARGS[1])]
 #ka7 inputs can go from 1 to 9, consistent with kaRange
 ka7minExponent, ka7maxExponent = parse(Int64, ARGS[2]), parse(Int64, ARGS[3])
 
