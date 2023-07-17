@@ -27,37 +27,36 @@ function setOutputDir(df=dfRange[1], ka7=ka7minExponent)
     end
     testdf = DataFrame(Dict("X" => 0.0))
     CSV.write("AllData/test.csv", testdf)
-    progressFile = open("progress.txt", "w")
-    return progressFile
 end
+
+function printProgressMessage(message)
+    open("progress.txt", "a") do file
+        println(file, message)
+    end
+end
+
 
 """
 Loop over all ranges and evaluate if oscillatory.
 """
 function makeSolutionCSVs(dfRange=dfRange, ka7minExponent=ka7minExponent, ka7maxExponent=ka7maxExponent, kaRange=kaRange, kbRange=kbRange, Lrange=Lrange, Prange=Prange, Krange=Krange, Arange=Arange)
-    progressFile = setOutputDir()
+    setOutputDir()
     numRateCombos = length(dfRange) * (ka7maxExponent - ka7minExponent + 1) * length(kaRange) * length(kaRange) * length(kbRange)
-
     for dfest in dfRange
         #Initialize dictionary to store data in, will be converted to dataframe at termination
         data = Dict(:df => zeros(Float64, numRateCombos), :ka7 => zeros(Float64, numRateCombos),
             :ka4 => zeros(Float64, numRateCombos), :ka1 => zeros(Float64, numRateCombos), :kb1 => zeros(Float64, numRateCombos),
             :fit => zeros(Float64, numRateCombos), :per => zeros(Float64, numRateCombos), :amp => zeros(Float64, numRateCombos),
             :L => zeros(Float64, numRateCombos), :K => zeros(Float64, numRateCombos), :P => zeros(Float64, numRateCombos), :A => zeros(Float64, numRateCombos),
-            :oscFound => zeros(Int64, numRateCombos))
-        println(progressFile, "#################")
-        println(progressFile, "df = $(dfest)")
-        println(progressFile, "#################")
-        flush(progressFile)
+            :oscFound => zeros(Int64, numRateCombos))            
+        printProgressMessage("Initalizing: df = $(dfest)")
         #Initialize new dataframe at each df value
         count = 1
         numericalErrorCount = 0
         for ka7est in kaRange[ka7minExponent:ka7maxExponent]
-            println(progressFile, "You are at ka7=$(ka7est).")
-            flush(progressFile)
+            printProgressMessage("You are at ka7=$(ka7est).")
             for ka4est in kaRange
-                println(progressFile, "ka4 = $(ka4est)")
-                flush(progressFile)
+                printProgressMessage("ka4 = $(ka4est)")
                 for ka1est in kaRange
                     for kb1est in kbRange
                         #Set up parameter values
@@ -113,8 +112,7 @@ function makeSolutionCSVs(dfRange=dfRange, ka7minExponent=ka7minExponent, ka7max
             allDataName = "AllData/df_($dfest)_ka7_$(ka7est).csv"
             CSV.write(allDataName, datadf)
         end
-        println(progressFile, "At df = $(dfest), $(numericalErrorCount) numerical errors occurred.")
-        flush(progressFile)
+        printProgressMessage("At df = $(dfest), $(numericalErrorCount) numerical errors occurred.")
     end
 end
 
