@@ -35,7 +35,7 @@ function makeSolutionCSVs()
         #Initialize new dataframe at each df value
         oscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[],
                     fit=Float64[],per=Float64[], amp=Float64[],L=Float64[], K=Float64[], P=Float64[], A=Float64[])
-        nonoscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[])
+        nonoscData = DataFrame(DF=Float64[], ka7=Float64[], ka4=Float64[], ka1=Float64[], kb1=Float64[], oscFound=Int64[])
         dfest = df
         numericalErrorCount = 0
         for ka7 in kaRange
@@ -75,7 +75,7 @@ function makeSolutionCSVs()
                             end
                         end
                         if oscFound < 3
-                            push!(nonoscData, Dict(:DF => df, :ka7 => ka7, :ka4 => ka4, :ka1 => ka1, :kb1 => kb1))
+                            push!(nonoscData, Dict(:DF => df, :ka7 => ka7, :ka4 => ka4, :ka1 => ka1, :kb1 => kb1, :oscFound=>oscFound))
                         end
                         oscFound = 0
                     end

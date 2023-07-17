@@ -81,10 +81,10 @@ const kaRange = 10.0 .^ ((-6:2) ./2)
 const kbRange = 10.0 .^ ((-6:6) ./2)
 
 #// TODO Double resolution
-const Lrange = 10.0 .^ (-4:4) ./2
-const Krange = 10.0 .^ (-6:4) ./2
-const Prange = 10.0 .^ (-6:2) ./2
-const Arange = 10.0 .^ (-4:4) ./2
+const Lrange = 10.0 .^ ((-4:4) ./2)
+const Krange = 10.0 .^ ((-6:4) ./2)
+const Prange = 10.0 .^ ((-6:2) ./2)
+const Arange = 10.0 .^ ((-4:4) ./2)
 
 #Set up array of initial conditions that will be tested in advance for ease of later code
 function makeCombos(Lrange, Krange, Prange, Arange)
