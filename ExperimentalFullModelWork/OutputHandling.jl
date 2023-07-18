@@ -3,7 +3,7 @@ using DataFrames
 using CSV
 using Interact
 using FFTW
-include("Constants.jl")
+include("FinalConstants.jl")
 include("EvaluationFunctions.jl")
 
 #osc_data = DataFrame(CSV.File("ExperimentalFullModelWork/OscCsvs/Osc_df_1.0.csv"))
@@ -192,7 +192,7 @@ function getAllCSVs()
     :L => Float64[], :K => Float64[], :P => Float64[], :A => Float64[],
     :oscFound => Int64[]))          
     filepaths = readdir(;join=true)
-    for i in filenames
+    for i in filepaths
         x = DataFrame(CSV.File(i))
         append!(mydf, x)
     end
@@ -201,20 +201,23 @@ end
 
 """
 Remove all evaluated values that would result in a negative rate constant
+Also remove empty rows
 """
-function removeBadValues(mydf; minka7 = (kcat7exp / Km7exp); Km1 = Km1exp)
-    lowka7df = mydf[:, :ka7 < minka7]
-    mydf = mydf[lowka7df,:]
-    lowkcat1df = mydf[:, Km1 * :ka1 > :kb1]
-    mydf = mydf[lowkcat1df]
-    return mydf
+function removeBadValues(mydf; minka7 = (kcat7exp / Km7exp), Km1 = Km1exp)
+    lowka7df = mydf[:, :ka7]  .< minka7
+    newdf = mydf[lowka7df,:]
+    lowkcat1df = newdf[:, :ka1] .* Km1 .> newdf[:, :kb1]
+    newdf = newdf[lowkcat1df, :]
+    emptyrowremoval = newdf[:,:df] .!= 0.0
+    newdf = newdf[emptyrowremoval, :]
+    return newdf
 end
 """
 Get dataframe holding only the values with at least minOscSols oscillatory
 solutions found
 """
 function getOscValues(mydf; minOscSols = 3)
-    booldf = mydf[:,:oscFound >= minOscSols]
+    booldf = mydf[:,:oscFound ] .>= minOscSols
     return mydf[booldf,:]
 end
 
