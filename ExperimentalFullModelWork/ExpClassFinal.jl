@@ -66,6 +66,7 @@ function makeSolutionCSVs(dfRange=dfRange, ka7minExponent=ka7minExponent, ka7max
                         p = [x[2] for x in psym]
                         #Count how many oscillatory solutions
                         oscFound = 0
+                        retcode = 0
                         for i in 1:numU0combos
                             curU0 = u0combos[i, :]
                             u0[1:4] = curU0[1:4]
