@@ -179,3 +179,43 @@ function oscPlotWithSlider(plot_dict; dfRange = dfRange, kaRange = kaRange)
         Plots.plot(plot_dict[df][ka7])
     end
 end
+
+
+"""
+Upload all csvs in a folder into 1 dataframe
+"""
+function getAllCSVs()
+    numRateCombos = 1
+    mydf = DataFrame(Dict(:df => Float64[], :ka7 => Float64[],
+    :ka4 => Float64[], :ka1 => Float64[], :kb1 => Float64[],
+    :fit => Float64[], :per => Float64[], :amp => Float64[],
+    :L => Float64[], :K => Float64[], :P => Float64[], :A => Float64[],
+    :oscFound => Int64[]))          
+    filepaths = readdir(;join=true)
+    for i in filenames
+        x = DataFrame(CSV.File(i))
+        append!(mydf, x)
+    end
+    return mydf
+end
+
+"""
+Remove all evaluated values that would result in a negative rate constant
+"""
+function removeBadValues(mydf; minka7 = (kcat7exp / Km7exp); Km1 = Km1exp)
+    lowka7df = mydf[:, :ka7 < minka7]
+    mydf = mydf[lowka7df,:]
+    lowkcat1df = mydf[:, Km1 * :ka1 > :kb1]
+    mydf = mydf[lowkcat1df]
+    return mydf
+end
+"""
+Get dataframe holding only the values with at least minOscSols oscillatory
+solutions found
+"""
+function getOscValues(mydf; minOscSols = 3)
+    booldf = mydf[:,:oscFound >= minOscSols]
+    return mydf[booldf,:]
+end
+
+
