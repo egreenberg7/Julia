@@ -58,9 +58,22 @@ function adaptiveSolve(prob::ODEProblem, u0, shortSpan, longSpan, p; abstol = 1e
     if ret1[1] != 4.0
         return ret1
     else
-        sol = solve(remake(prob, u0=u0, tspan=(0.0, longSpan), p=p), Rodas4(), abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=150.0 * longSpan, verbose=false)#, callback=TerminateSteadyState(1e-8,1e-12)
+        sol = solve(remake(prob, u0=u0, tspan=(0.0, longSpan), p=p), Rodas4(), abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=150.0 * longSpan, verbose=false)
         return finalClassifier(sol, longSpan)
     end 
+end
+
+"""
+Given an ODEProblem, parameters, and tspan, it will solve the problem and classify the solution
+using the inputted classifier function (`finalClassifier` default)
+- `prob` ODEProblem to solve
+- `u0` Initial concentrations
+- `tSpan` Integration max
+- `p` Parameter values
+"""
+function singleSolve(prob::ODEProblem, u0, tspan, p; abstol = 1e-6, reltol=1e-8, alg = Rodas4(), classifier = finalClassifier)
+    sol = solve(remake(prob, u0=u0, tspan=(0.0, tspan), p=p), alg, abstol=abstol, reltol=reltol, saveat=0.1, save_idxs=1, maxiters=150.0 * shortSpan, verbose=false)
+    return classifier(sol, tspan)
 end
 
 """

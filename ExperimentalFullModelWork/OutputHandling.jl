@@ -3,7 +3,7 @@ using DataFrames
 using CSV
 using Interact
 using FFTW
-include("FinalConstants.jl")
+include("NoNegConstants.jl")
 include("EvaluationFunctions.jl")
 
 #osc_data = DataFrame(CSV.File("ExperimentalFullModelWork/OscCsvs/Osc_df_1.0.csv"))
@@ -182,7 +182,9 @@ end
 
 
 """
-Upload all csvs in a folder into 1 dataframe
+Upload all csvs in the working directory into 1 dataframe. The working
+directory must contain only CSV files of output from running
+NoNegConstants.jl
 """
 function getAllCSVs()
     mydf = DataFrame(Dict(:df => Float64[], :ka7 => Float64[],
@@ -219,5 +221,18 @@ function getOscValues(mydf; minOscSols = 3)
     booldf = mydf[:,:oscFound ] .>= minOscSols
     return mydf[booldf,:]
 end
-
+"""
+Extracts and calculates the array of rate constants from a dataframe
+"""
+function getP(mydf, row)
+    ka1est = mydf[row, :ka1]
+    kb1est = mydf[row, :kb1]
+    ka7est = mydf[row, :ka7]
+    ka4est = mydf[row, :ka4]
+    dfest = mydf[row, :df]
+    psym = [:ka1 => ka1est, :kb1 => kb1est, :kcat1 => Km1exp * ka1est - kb1est, :ka2 => ka2exp, :kb2 => kb2exp,
+        :ka3 => ka3exp, :kb3 => kb3exp, :ka4 => ka4est, :kb4 => Kd4exp * ka4est, :ka7 => ka7est, 
+        :kb7 => Km7exp * ka7est - kcat7exp, :kcat7exp => 85.3, :y => dfest]
+    p = [x[2] for x in psym]
+end
 
