@@ -67,6 +67,7 @@ function classifyConcentrations(p, u0RangeDict; u0 = zeros(16), savedata = true,
     df=DataFrame(data)
     if savedata
         CSV.write("$(filename).csv", df)
+        cd("..")
     end
     return df
 end
