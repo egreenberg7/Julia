@@ -32,14 +32,6 @@ function getPerAmp(sol::ODESolution, indx_max::Vector{Int}, vals_max::Vector{Flo
 end
 
 
-#// TODO Determine tspanInc and maximum number of iterations
-#// TODO Determine minimum prominence for peaks
-#// TODO Determine what needs to be returned
-#TODO Implement isDamped
-#// TODO Finalize isSteady conditions
-#// TODO Refactor code to minimize calls to findmaxima
-#// TODO Find different between findmaxima and argmaxima
-#TODO Have a fun time :)
 """
 Given an ODEProblem and parameters, it will first try to classify the solution as oscillatory or not using `finalClassifier`
 by integrating from `0` to `shortSpan`. If unsuccessful, it will integrate again from `0` to `longSpan` and then returns 
