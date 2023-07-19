@@ -23,7 +23,7 @@ function entryToSol(df, row; tspan = shortSpan)
     kb1est = currow[:kb1]
     ka4est = currow[:ka4]
     ka7est = currow[:ka7]
-    dfest = currow[:DF]
+    dfest = currow[:df]
     psym = [:ka1 => ka1est, :kb1 => kb1est, :kcat1 => Km1exp * ka1est - kb1est, :ka2 => ka2exp, :kb2 => kb2exp,
                             :ka3 => ka3exp, :kb3 => kb3exp, :ka4 => ka4est, :kb4 => Kd4exp * ka4est, :ka7 => ka7est, 
                             :kb7 => Km7exp * ka7est - kcat7exp, :kcat7exp => 85.3, :y => dfest]
@@ -123,7 +123,7 @@ function PlotNoka7WithShadow(df, title)
     Plots.scatter!(xlabel="log(ka1)",ylabel="log(kb1)",zlabel="log(ka4)", legend=:none, title=title)
 
     #Replot coordinates to make sure they are on top of projected points
-    #Plots.scatter!(x,y,z,mc=:black, ms = 2)
+    Plots.scatter!(x,y,z,mc=:black, ms = 2)
     #Make it so there are set axis sizes based on the ranges, can be commented out
     xlims!((log10.((kaRange[1], kaRange[end]))))
     ylims!(log10.((kbRange[1], kbRange[end])))
@@ -185,7 +185,6 @@ end
 Upload all csvs in a folder into 1 dataframe
 """
 function getAllCSVs()
-    numRateCombos = 1
     mydf = DataFrame(Dict(:df => Float64[], :ka7 => Float64[],
     :ka4 => Float64[], :ka1 => Float64[], :kb1 => Float64[],
     :fit => Float64[], :per => Float64[], :amp => Float64[],
@@ -204,7 +203,7 @@ Remove all evaluated values that would result in a negative rate constant
 Also remove empty rows
 """
 function removeBadValues(mydf; minka7 = (kcat7exp / Km7exp), Km1 = Km1exp)
-    lowka7df = mydf[:, :ka7]  .< minka7
+    lowka7df = mydf[:, :ka7]  .> minka7
     newdf = mydf[lowka7df,:]
     lowkcat1df = newdf[:, :ka1] .* Km1 .> newdf[:, :kb1]
     newdf = newdf[lowkcat1df, :]
