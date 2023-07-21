@@ -242,7 +242,7 @@ end
 Runs the genetic algorithm, returning the `result`, and the `record` named tuple
 Threshold: number of oscillatory solutions until program terminates
 """
-function run_GA(ga_problem::GAProblem, fitnessfunction_factory::Function=make_fitness_function; threshold=10000, population_size = 10000, abstol=1e-12, reltol=1e-10, successive_f_tol = 1, iterations=1, parallelization = :thread)
+function run_GA(ga_problem::GAProblem, fitnessfunction_factory::Function=make_fitness_function; threshold=10000, population_size = 10000, abstol=1e-12, reltol=1e-10, successive_f_tol = 1, iterations=5, parallelization = :thread)
     blas_threads = BLAS.get_num_threads()
     BLAS.set_num_threads(1)
     # Generate the initial population.

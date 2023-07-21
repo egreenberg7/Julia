@@ -123,13 +123,13 @@ function CostFunction(sol::ODESolution)::Vector{Float64}
         return [1.0, 0.0, 0.0]
     end
     std = getSTD(fft_peakindexes, fftData) #* get the average standard deviation of the peaks in frequency domain
-    #diff = getDif(fft_peakvals) #* get the summed difference between the peaks in frequency domain
+    diff = getDif(fft_peakvals) #* get the summed difference between the peaks in frequency domain
 
     #* Compute the period and amplitude
     period, amplitude = getPerAmp(sol, time_peakindexes, time_peakvals)
 
     #* Return cost, period, and amplitude as a vector
-    return [-std, period, amplitude]
+    return [-std - diff, period, amplitude]
 end
 
 

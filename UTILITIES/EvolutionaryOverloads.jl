@@ -21,7 +21,7 @@ Changed the oscillatory cuttoff from 0.1 to -0
 EVERY GENERATION (each update of GA state) calls this and the callback
 """
 function Evolutionary.trace!(record::Dict{String,Any}, objfun, state, population::Vector{Vector{Float64}}, method::GA, options) 
-    oscillatory_population_idxs = findall(fit -> fit < -0., state.fitpop) #find the indices of the oscillatory individuals
+    oscillatory_population_idxs = findall(fit -> fit < -0.1, state.fitpop) #find the indices of the oscillatory individuals
     record["staterecord"] = [(ind=population[i], fit=state.fitpop[i], per=state.extradata[i][1], amp=state.extradata[i][2]) for i in oscillatory_population_idxs]
     record["num_oscillatory"] = length(oscillatory_population_idxs)
 end
