@@ -3,6 +3,7 @@ using DataFrames
 using CSV
 using Interact
 using FFTW
+using LaTeXStrings
 include("NoNegConstants.jl")
 include("EvaluationFunctions.jl")
 
@@ -194,8 +195,10 @@ function getAllCSVs()
     :oscFound => Int64[]))          
     filepaths = readdir(;join=true)
     for i in filepaths
-        x = DataFrame(CSV.File(i))
-        append!(mydf, x)
+        if occursin("csv", i)
+            x = DataFrame(CSV.File(i))
+            append!(mydf, x)
+        end
     end
     return mydf
 end
@@ -236,3 +239,50 @@ function getP(mydf, row)
     p = [x[2] for x in psym]
 end
 
+"""
+Take dataframe of concentrations from concentration classifier,
+the parameters, and a lipid concentration and generate graph
+"""
+function make3DAmpGraph(mydf,L)
+    booldf = mydf[:,:L] .== L
+    df = mydf[booldf, :]
+    x = df.K #K
+    y = df.P #P 
+    z = df.A #A
+    constantTwos=fill(-2,length(x))
+    constantThrees=fill(-3,length(x))
+            
+    log_x = log10.(x)
+    log_y = log10.(y)
+    log_z = log10.(z)
+
+    colorVals = df.amp ./ L # NormalizedAmplitude
+
+    graph = Plots.plot(Plots.scatter(log_x,log_y,constantTwos,marker_z=colorVals,markershape= :xcross,alpha=0.5,ms=2))
+    Plots.scatter!(graph, log_x,-constantTwos,log_z,marker_z=colorVals,markershape= :xcross, alpha=0.5,ms=2)
+    Plots.scatter!(graph, constantThrees,log_y,log_z,markershape= :xcross,marker_z=colorVals,alpha=0.5,ms=2)
+    Plots.scatter!(graph, constantTwos,log_y,log_z,marker_z=colorVals, markershape= :xcross,alpha=0.5,ms=2)
+    Plots.scatter!(graph,
+        log_x,
+        log_y,
+        log_z,
+        marker_z=colorVals,
+        title=L"$10^{%$(log10(L))}\textrm{ μM PIP}$",
+        titlefontsize = 14,
+        xlims=(-2,2),
+        ylims=(-2,2),
+        zlims=(-2,2),
+        legend=:none,
+        markerstrokealpha=0,
+        markersize = 3,
+        markerstrokewidth = 0.2,
+        xaxis=(L"\textrm{\log(PIP5K) (μM)}"),
+        yaxis=(L"\textrm{\log(Synaptojanin) (μM)}"),
+        zaxis=(L"\textrm{\log(AP2) (μM)}"),
+        xguidefontsize=12,
+        yguidefontsize = 12,
+        zguidefontsize=12,
+        #xticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]), 
+        #zticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]),
+        #yticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]))
+end
