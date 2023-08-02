@@ -1,8 +1,8 @@
 #File for functions based around classifying solutions over range of
 #initial concentrations rather than rate constants.
 
-include("NoNegConstants.jl")
-include("EvaluationFunctions.jl")
+#include("NoNegConstants.jl")
+#include("EvaluationFunctions.jl")
 using CSV
 
 """

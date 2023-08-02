@@ -240,6 +240,22 @@ function getP(mydf, row)
 end
 
 """
+Takes CSV file and constructs an array of all the p values contained inside. Useful
+for parsing CSV with osc values to do more indepth concentration search.
+"""
+function getAllUniqueP(mydf)
+    #Extract dataframe containing only unique p combinations for non-experimental values
+    pDF = unique(mydf[:,[:ka1, :kb1, :ka7,:ka4, :df]])
+    numRows = size(pDF,1)
+    pArr = zeros(numRows, 13)
+    #Construct the rest of the p values based on the experimental values
+    for i in 1:size(pDF, 1)
+        pArr[i, :] = getP(pDF, i)
+    end
+    return pArr    
+end
+
+"""
 Take dataframe of concentrations from concentration classifier,
 the parameters, and a lipid concentration and generate graph
 """
@@ -281,7 +297,7 @@ function make3DAmpGraph(mydf,L)
         zaxis=(L"\textrm{\log(AP2) (μM)}"),
         xguidefontsize=12,
         yguidefontsize = 12,
-        zguidefontsize=12,
+        zguidefontsize=12)#,
         #xticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]), 
         #zticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]),
         #yticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]))
