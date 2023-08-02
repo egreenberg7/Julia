@@ -33,6 +33,22 @@ function entryToSol(df, row; tspan = shortSpan)
 end
 
 """
+Converts row in dataframe of oscillatory concentrations for a given p 
+into a solution.
+- `df` Dataframe of oscillatory solutions
+- `row` Row of dataframe to solve
+- `p` Rate constants for the given dataframe
+"""
+function entryToSol(df, row, p; tspan = shortSpan)
+    currow = df[row,:]
+    u0[1] = currow[:L]
+    u0[2] = currow[:K]
+    u0[3] = currow[:P]
+    u0[4] = currow[:A] 
+    return solve(remake(prob, u0=u0, tspan=(0.0, tspan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=1, maxiters=200 * tspan, verbose=false, callback=TerminateSteadyState(1e-8, 1e-12))
+end
+
+"""
 Creates plots of all solutions and their Fourier transforms for a dataframe of oscillatory points
 in directory sum_plots
 - `osc_df` Dataframe of oscillatory solutions
