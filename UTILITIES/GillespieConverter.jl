@@ -22,18 +22,20 @@ dividing by volume or multiplying by other factors as appropriate for the reacti
 - `volume` Volume of reaction vessel
 """
 function convertP(p, volume)
-    gillespieP = p
+    gillespieP = zeros(13)
     gillespieP[1] = p[1] / volume #ka1, 2nd order
     gillespieP[2] = p[2] #kb1, 1st order
     gillespieP[3] = p[3] #kcat1, 1st order
     gillespieP[4] = p[4] / volume #ka2, 2nd order
     gillespieP[5] = p[5] #kb2, 1st order
     gillespieP[6] = p[6] / volume #ka3, 2nd order
-    gillespieP[7] = p[7] #kb4, 1st order
-    gillespieP[8] = p[8] / volume #ka7, 2nd order
-    gillespieP[9] = p[9] #kb7, 1st order
-    gillespieP[10] = p[10] #kcat7, 1st order
-    gillespieP[11] = p[11] #df, not dependent on order???
+    gillespieP[7] = p[7] #kb3, 1st order
+    gillespieP[8] = p[8] / volume #ka4, 2nd order
+    gillespieP[9] = p[9] #kb4, 1st order
+    gillespieP[10] = p[10] / volume #ka7, 2nd order
+    gillespieP[11] = p[11] #kb7, 1st order
+    gillespieP[12] = p[12] #kcat7, 1st order
+    gillespieP[13] = p[13] #df, not dependent on order???
     return gillespieP
 end
 
