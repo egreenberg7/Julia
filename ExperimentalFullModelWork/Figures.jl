@@ -13,7 +13,7 @@ allParams = unique(removeBadValues(alldata)[:, [:ka1, :ka4, :ka7, :kb1]])
 groupedDF = groupby(oscParams, :ka4)
 
 function addPlt(plt, df; markershape=:circle)
-    scatter!(plt, log10.(df.ka1), log10.(df.kb1), log10.(df.ka7), label="$(log10(df.ka4[1]))", markershape = markershape, alpha = 0.5)
+    scatter!(plt, log10.(df.ka1), log10.(df.kb1), log10.(df.ka7), label="10^{$(log10(df.ka4[1]))}", markershape = markershape, alpha = 0.5)
     plt
 end
 function addProj(plt, df; markershape=:circle)
@@ -24,48 +24,97 @@ function addProj(plt, df; markershape=:circle)
     plt
 end
 
-plt = Plots.plot(legendtitle="log10(ka4)", 
-    title="Dimensionality Factor = 10,000",
-    legend=:outerright)
-shapes = [:circle, :diamond, :utriangle]
+#Code to create zoomed in graph of oscillatory rate constants
+begin 
+    plt = Plots.plot(legendtitle="log10(ka4)", 
+        title="Dimensionality Factor = 10,000",
+        legend=:outerright, dpi = 300,
+        formatter=x->"10^{$(round(x, digits=1))}")
+    shapes = [:circle, :diamond, :utriangle]
 
-for (df,shape) in zip(groupedDF, shapes)
-    addPlt(plt, df, markershape=shape)
-end
-xbounds = xlims(plt)
-ybounds = ylims(plt)
-zbounds = zlims(plt)
-for (df,shape) in zip(groupedDF, shapes)
-    addProj(plt, df, markershape=shape)
-    xlims!(plt, xbounds)
-    ylims!(plt, ybounds)
-    zlims!(plt, zbounds)
+    for (df,shape) in zip(groupedDF, shapes)
+        addPlt(plt, df, markershape=shape)
+    end
+    xbounds = xlims(plt)
+    ybounds = ylims(plt)
+    zbounds = zlims(plt)
+    for (df,shape) in zip(groupedDF, shapes)
+        addProj(plt, df, markershape=shape)
+        xlims!(plt, xbounds)
+        ylims!(plt, ybounds)
+        zlims!(plt, zbounds)
+    end
+
+    xlabel!(plt, "ka1 (μM/s)")
+    ylabel!(plt, "kb1 (μM/s)")
+    zlabel!(plt, "ka7 (μM/s)")
+    title!(plt, "Oscillatory Parameters\n Dimensionality Factor = 10,000")
+    plt
+    Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/oscillatoryParams.png")
+end 
+
+#Code to create zoomed out graph of oscillatory params
+begin
+    plt = Plots.plot(legendtitle="log10(ka4)", 
+        title="Dimensionality Factor = 10,000",
+        legend=:outerright, dpi = 300,
+        formatter=x->"10^{$(round(x, digits=1))}",
+        xlims=(log10(kaRange[1]), log10(kaRange[end])), 
+        ylims = (log10(kbRange[1]), log10(kbRange[end])), 
+        zlims = (log10(ka7Range[1]), log10(ka7Range[end])), 
+        xtickfontsize = 6,
+        ytickfontsize = 6,
+        ztickfontsize = 6)
+    shapes = [:circle, :diamond, :utriangle]
+
+    for (df,shape) in zip(groupedDF, shapes)
+        addPlt(plt, df, markershape=shape)
+    end
+    xbounds = xlims(plt)
+    ybounds = ylims(plt)
+    zbounds = zlims(plt)
+    for (df,shape) in zip(groupedDF, shapes)
+        addProj(plt, df, markershape=shape)
+        xlims!(plt, xbounds)
+        ylims!(plt, ybounds)
+        zlims!(plt, zbounds)
+    end
+
+    xlabel!(plt, "ka1 (μM/s)")
+    ylabel!(plt, "kb1 (μM/s)")
+    zlabel!(plt, "ka7 (μM/s)")
+    title!(plt, "Oscillatory Parameters\n Dimensionality Factor = 10,000")
+    plt
+    Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/oscillatoryParamsOut.png")
 end
 
-xlabel!(plt, "log10(ka1)")
-ylabel!(plt, "log10(kb1)")
-zlabel!(plt, "log10(ka7)")
-title!(plt, "Oscillatory Parameters\n Dimensionality Factor = 10,000")
-plt
-Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/oscillatoryParams.png")
-
-searchPLT = Plots.scatter3d([],[],[],
-    xlims=(log10(kaRange[1]), log10(kaRange[end])), 
-    ylims = (log10(kbRange[1]), log10(kbRange[end])), 
-    zlims = (log10(ka7Range[1]), log10(ka7Range[end])), 
-    legendtitle="log10(ka4)", 
-    label=:none,
-    legend=:topright;
-    xlabel = "log10(ka1)",
-    ylabel = "log10(kb1)",
-    zlabel = "log10(ka7)",
-    zticks = range(0.4,1.0,4))
-for i in log10.(kaRange)
-    scatter3d!(searchPLT, [],[],[],label = "$i", shape = :circle, color=:black)
+#Code to create plot of search space 
+begin
+    searchPLT = Plots.scatter3d([],[],[],
+        xlims=(log10(kaRange[1]), log10(kaRange[end])), 
+        ylims = (log10(kbRange[1]), log10(kbRange[end])), 
+        zlims = (log10(ka7Range[1]), log10(ka7Range[end])), 
+        legendtitle="ka4 (μM/s)", 
+        label=:none,
+        legend=:topright,
+        title = "Parameter Search Space: \n Dimensionality Factor = [0.1, 10,000]",
+        xlabel = "ka1 (μM/s)",
+        ylabel = "kb1 (μM/s)",
+        zlabel = "ka7 (μM/s)",
+        xtickfontsize = 6,
+        ytickfontsize = 6,
+        ztickfontsize = 6,
+        zticks = range(0.4,1.0,4),
+        dpi = 300,
+        formatter = x->"10^{$x}")
+    for i in log10.(kaRange)
+        scatter3d!(searchPLT, [],[],[],label = "10^{$i}", shape = :circle, color=:black)
+    end
+    addProj(searchPLT, allParams)
+    searchPLT
+    Plots.savefig(searchPLT,"ExperimentalFullModelWork/graphStorage/searchspace.png")
 end
-addProj(searchPLT, allParams)
-searchPLT
-Plots.savefig(searchPLT,"ExperimentalFullModelWork/graphStorage/searchspace.png")
+
 
 #Representative parameter combination 
 paramset = oscdata[oscdata[:, :ka1].==0.1 .&& oscdata[:,:kb1] .== 0.1 .&& oscdata[:, :ka7] .== 10^0.6 .&& oscdata[:, :ka4] .== 10 ^-2.5,:]
