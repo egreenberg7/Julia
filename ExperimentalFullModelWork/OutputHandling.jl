@@ -319,6 +319,9 @@ function make3DAmpGraph(mydf,L)
         #yticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]))
 end
 
+"""
+Take dataframe of concentrations and make graph where colors represent lipids.
+"""
 function make3DAmpGraph(mydf)
     df = mydf
     x = df.K #K
@@ -332,7 +335,7 @@ function make3DAmpGraph(mydf)
     log_z = log10.(z)
 
     colorVals = log10.(df.L)
-
+    
     graph = Plots.plot(Plots.scatter(log_x,log_y,constantTwos,marker_z=colorVals,markershape= :xcross,alpha=0.5,ms=2))
     Plots.scatter!(graph, log_x,-constantTwos,log_z,marker_z=colorVals,markershape= :xcross, alpha=0.5,ms=2)
     Plots.scatter!(graph, constantThrees,log_y,log_z,markershape= :xcross,marker_z=colorVals,alpha=0.5,ms=2)
@@ -342,6 +345,10 @@ function make3DAmpGraph(mydf)
         log_y,
         log_z,
         marker_z=colorVals,
+        formatter=x->"10^{$x}",
+        colorbar_formatter=x->"10^{$x}",
+        colorbar_discrete_values = unique(colorVals), 
+        color = palette(:default, length(unique(colorVals))),
         title="Oscillatory Initial concentrations",
         titlefontsize = 14,
         xlims=(-2,2),
@@ -351,13 +358,13 @@ function make3DAmpGraph(mydf)
         markerstrokealpha=0,
         markersize = 3,
         markerstrokewidth = 0.2,
-        xaxis=(L"\textrm{\log(PIP5K) (μM)}"),
-        yaxis=(L"\textrm{\log(Synaptojanin) (μM)}"),
-        zaxis=(L"\textrm{\log(AP2) (μM)}"),
+        xaxis="PIP5K (μM)",
+        yaxis="Synaptojanin (μM)",
+        zaxis="AP2 (μM)",
         xguidefontsize=12,
         yguidefontsize = 12,
         zguidefontsize=12,
-        colorbar_title=(L"\textrm{\log(PIP) (μM)}"))#,
+        colorbar_title=("PIP (μM)"))#,
         #xticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]), 
         #zticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]),
         #yticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]))
