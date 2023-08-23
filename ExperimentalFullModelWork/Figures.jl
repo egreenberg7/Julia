@@ -9,6 +9,22 @@ cd("../..")
 oscParams = unique(oscdata[:, [:ka1, :ka4, :ka7, :kb1]])
 allParams = unique(removeBadValues(alldata)[:, [:ka1, :ka4, :ka7, :kb1]])
 
+"""
+Check if I had invalid parameters...
+"""
+begin
+    for i in size(oscdata)[1]
+        curP = getP(oscdata, i)
+        if curP[3] > 10.0^3 || curP[3] < 10.0^-3.0
+            println("Bad kcat1")
+        elseif curP[8] < 10.0 ^ -3.0 || curP[3] > 10.0^3.0 
+            println("Bad kb") 
+        elseif curP[10] <10.0^-3.0 || curP[3] > 10.0^3.0
+            println("Another bad kb")
+        end
+    end
+end
+
 
 groupedDF = groupby(oscParams, :ka4)
 
@@ -134,12 +150,13 @@ paramset = oscdata[oscdata[:, :ka1].==0.1 .&& oscdata[:,:kb1] .== 0.1 .&& oscdat
 u0Graph = make3DAmpGraph(paramset)
 Plots.savefig(u0Graph, "ExperimentalFullModelWork/graphStorage/u0graph.png")
 
-sol = entryToSol(paramset, 4, tspan=600)
+sol = entryToSol(paramset, 5, tspan=600)
 exSolPlt = Plots.plot(sol, title="Representative Solution",
-    label="Analytic Solution", xlabel = "Time (s)", ylabel = "PIP (μM)", dpi=300, size=(1800,400))
+    label="Numerical Solution", xlabel = "Time (s)", ylabel = "PIP (μM)", 
+    dpi=300, size=(1800,400), legendfontsize=12)
 volume = 0.5
-p=getP(paramset, 4)
-    currow = paramset[4, :]
+p=getP(paramset, 5)
+    currow = paramset[5, :]
     u0[1] = currow[:L]
     u0[2] = currow[:K]
     u0[3] = currow[:P]
@@ -151,7 +168,7 @@ p=getP(paramset, 4)
     GillespieConcSol = [i[1] for i in jumpSol.u] ./ (GillespieConverter.Nₐ * volume * 1e-21)
     plot!(exSolPlt, jumpSol.t, GillespieConcSol, label = "Gillespie Simulation", legend=:topright)
     xlabel!(exSolPlt, "Time (s)")
-savefig(exSolPlt, "ExperimentalFullModelWork/graphStorage/exampleSol4.png")
+savefig(exSolPlt, "ExperimentalFullModelWork/graphStorage/exampleSol5.png")
 #Code to create a concentration plot
 begin 
     groupedDFC = groupby(paramset, :L)
