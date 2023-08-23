@@ -369,3 +369,35 @@ function make3DAmpGraph(mydf)
         #zticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]),
         #yticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]))
 end
+
+"""
+Function to plot 3d group graphs with legend of labels??? Currently Only for L
+"""
+function makeGroupGraph(df, labels)
+    plt = Plots.scatter3d(xlabel="PIP5K (μM)", ylabel="Synaptojanin (μM)", zlabel="AP2 (μM)", 
+                            title="Oscillatory Concentrations", legendtitle="PIP2 (μM)",
+                            xlims = log10.((Krange[1], Krange[end])), ylims = log10.((Prange[1], Prange[end])),
+                            zlims = log10.((Arange[1], Arange[end])), clims = log10.((Lrange[1], Lrange[end])),
+                            formatter=x->"10^{$(round(x, digits=1))}",
+                            colorbar_formatter=x->"10^{$(round(x, digits=1))}", 
+                            cbartitle="PIP2 Concentrations (μM)",
+                            dpi=300)
+    groupedDF = groupby(df, labels)
+    for i in groupedDF
+        #Lval = log10(i.L[1])
+        logL = log10.(i.L)
+        logx = log10.(i.K)
+        logy = log10.(i.P)
+        logz = log10.(i.A)
+        Plots.scatter3d!(plt, logx, logy, logz, marker_z = logL, labels = :none)
+    end
+    function addConcProj(plt, df; markershape=:circle)
+        numElems = size(df)[1]
+        scatter!(plt, log10.(df.K), log10.(df.P), fill(zlims(plt)[1], numElems), label=:none, markershape = markershape, alpha = 0.5, color = :black, ms = 2)
+        scatter!(plt, log10.(df.K), fill(ylims(plt)[2], numElems), log10.(df.A), label=:none, markershape = markershape, alpha = 0.5, color = :black, ms = 2)
+        scatter!(plt, fill(xlims(plt)[1], numElems), log10.(df.P), log10.(df.A), label=:none, markershape = markershape, alpha = 0.5, color = :black, ms = 2)
+        plt
+    end
+    addConcProj(plt, oscdata)
+    return plt
+end
