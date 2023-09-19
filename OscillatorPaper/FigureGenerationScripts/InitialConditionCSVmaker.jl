@@ -1,5 +1,5 @@
 begin 
-    using Plots 
+    using Plots; #theme(:juno)
     using Catalyst
     using DifferentialEquations
     using Statistics
@@ -8,8 +8,9 @@ begin
     using Random
     using Distributions
     using DataFrames
+    using CSV
     # using Unitful
-    # using Unitful: µM, nm, s
+    # using Unitful: µM, M, nm, µm, s, μs, Na, L, 𝐍
     using StaticArrays
     using BenchmarkTools, Profile, ProgressMeter
     # using Cthulhu
@@ -20,14 +21,13 @@ begin
     # using BifurcationKit, Setfield, ForwardDiff, Parameters; const BK = BifurcationKit
     using ColorSchemes, Plots.PlotMeasures
     # using OrderedCollections
-    using Combinatorics
+    # using Combinatorics
     # using LazySets, Polyhedra
-    default(lw = 2, size = (1000, 600), dpi = 200, bottom_margin = 12px, left_margin = 16px, top_margin = 8px)
-    plotlyjs()
-    using CairoMakie
+    default(lw = 2, size = (1000, 600), dpi = 200, bottom_margin = 12px, left_margin = 16px, top_margin = 10px, right_margin = 8px)
+    # plotlyjs()
+    # import CairoMakie as cm 
     # gr()
-    # using Base.Threads
-
+    # push!(LOAD_PATH, "../../UTILITIES")
 
     include("../../UTILITIES/EvolutionaryOverloads.jl")
 
@@ -36,34 +36,31 @@ begin
 
     # import the cost function and other evaluation functions
     include("../../UTILITIES/EvaluationFunctions.jl")
+    # using .EvaluationFunctions
 
     # import the genetic algorithm and associated functions
     include("../../UTILITIES/GA_functions.jl")
 
-    # import the ODE problem generator. Sets `fullprob` as a constant
     include("../../UTILITIES/ODEProbMaker.jl")
+
+    include("../../UTILITIES/UnitTools.jl")
+
 
     const SHOW_PROGRESS_BARS = parse(Bool, get(ENV, "PROGRESS_BARS", "true"))
 end
 
-#* Solve model for arbitrary oscillatory parameters and initial conditions
-sol = solve(fullprob, saveat=0.1)
 
-#* Plot the phase diagrams with time as the third dimension
-Plots.plot(sol, idxs=(0, 1, 3), colorbar = false, xlabel = "Time", ylabel = "L", zlabel = "K", title = "Phase Diagrams")#, camera = (-100, 30))
+fullrn = make_fullrn()
+ogprob = ODEProblem(fullrn, [], (0.,1000.0), [])
 
-
-#! Makie plotting 
-begin
-    t = sol.t
-    x = sol[1]
-    y = sol[2,:]
-    z = sol[3,:]
-end
+ogsol = solve(ogprob, Rosenbrock23(), save_idxs = 1)
+plot(ogsol)
 
 
-f = Figure()
-ax = Axis(f[1,1])
-lines!(ax, t, x, color = :blue, linewidth = 3, linestyle = :dash)
-CairoMakie.scatter!(ax, t, x, color = range(0,1,length=length(t)), markersize = range(5, 15, length=length(t)), colormap = :viridis)
-f
+#* Optimization of initial conditions to produce data for CSV
+ic_constraints = define_initialcondition_constraints(lipidrange = (0.1,10.), kinaserange = (0.01,10.), phosphataserange = (0.01,10.), ap2range = (0.01,10.))
+
+ic_gaproblem = GAProblem(ic_constraints,ogprob)
+
+ic_record = run_GA(ic_gaproblem)
+CSV.write("OscillatorPaper/FigureGenerationScripts/initialconditions.csv", ic_record)
