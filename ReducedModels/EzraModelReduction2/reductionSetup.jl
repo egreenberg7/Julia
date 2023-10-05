@@ -100,15 +100,54 @@ function symbolicmodel_ode!(du, u, p, t; rateEquations = rateEquations)
     theka1, thekb1, thekcat1, theka2, thekb2, theka3, thekb3, theka4, thekb4, theka7, thekb7, thekcat7, thedf = p #parameters
 
     function getDerivative(symbol, u = u, p = p; rateEquations = rateEquations)
-        if typeof(rateEquations[symbol].lhs == 0) == Bool && rateEquations[symbol].lhs == 0
+        if typeof(rateEquations[symbol].lhs == 0) == Bool # && rateEquations[symbol].lhs == 0
              return 0.0
         else
             expr = (rateEquations[symbol].rhs)
             val =  Symbolics.value(substitute(expr, 
-                Dict(L=>theL, K=>theK , P=>theP , A=>theA, Lp=>theLp, LpA=>theLpA,LK=>u[7], LpP=>u[8], LpAK=>u[9], LpAP=>u[10],
-                    LpAKL=>u[11],  LpAPLp=>u[12], AK=>u[13], AP=>u[14], AKL=>u[15], APLp=>u[16], 
+                Dict(L=>theL, K=>theK , P=>theP , A=>theA, Lp=>theLp, LpA=>theLpA,LK=>theLK, LpP=>theLpP, LpAK=>theLpAK, LpAP=>theLpAP,
+                    LpAKL=>theLpAKL,  LpAPLp=>theLpAPLp, AK=>theAK, AP=>theAP, AKL=>theAKL, APLp=>theAPLp, 
                     ka1=>p[1], kb1=>p[2], kcat1=>p[3], ka2=>p[4], kb2=>p[5], ka3=>p[6], kb3=>p[7], ka4=>p[8], kb4=>p[9],
                     ka7=>p[10], kb7=>p[11], kcat7=>p[12], df=>p[13])))
+            return val
+        end
+    end
+
+    du[1] = getDerivative(:dL)
+    du[2] = getDerivative(:dK)
+    du[3] = getDerivative(:dP)
+    du[4] = getDerivative(:dA)
+    du[5] = getDerivative(:dLp)
+    du[6] = getDerivative(:dLpA)
+    du[7] = getDerivative(:dLK)
+    du[8] = getDerivative(:dLpP)
+    du[9] = getDerivative(:dLpAK)
+    du[10] = getDerivative(:dLpAP)
+    du[11] = getDerivative(:dLpAKL)
+    du[12] = getDerivative(:dLpAPLp)
+    du[13] = getDerivative(:dAK)
+    du[14] = getDerivative(:dAP)
+    du[15] = getDerivative(:dAKL)
+    du[16] = getDerivative(:dAPLp)
+    nothing
+end
+
+
+"""
+Funciton to allow us to evaluate our reduced with the parameters subbed in in place. 
+#TODO FINISH THIS
+"""
+function symbolicmodelnoparams_ode!(du, u, p, t; rateEquationsSubbed = rateEquations)
+    theL, theK, theP, theA, theLp, theLpA, theLK, theLpP, theLpAK, theLpAP, theLpAKL, theLpAPLp, theAK, theAP, theAKL, theAPLp = u #initial conditions
+    p
+    function getDerivative(symbol, u = u; rateEquations = rateEquationsSubbed)
+        if typeof(rateEquations[symbol].lhs == 0) == Bool #&& rateEquations[symbol].lhs == 0
+             return 0.0
+        else
+            expr = (rateEquations[symbol].rhs)
+            val =  Symbolics.value(substitute(expr, 
+                Dict(L=>theL, K=>theK , P=>theP , A=>theA, Lp=>theLp, LpA=>theLpA,LK=>theLK, LpP=>theLpP, LpAK=>theLpAK, LpAP=>theLpAP,
+                    LpAKL=>theLpAKL,  LpAPLp=>theLpAPLp, AK=>theAK, AP=>theAP, AKL=>theAKL, APLp=>theAPLp)))
             return val
         end
     end
@@ -158,6 +197,8 @@ function getU(df, row)
     return u
 end
 
+sampleP = getP(datapoints, 100)
+
 """
 Function to generate plots of the solved equations from both the full model and
 the reduced model for comparison
@@ -168,8 +209,25 @@ function compareModels(row, model = symbolicmodel_ode!)
     actualProb = ODEProblem(fullmodel_ode!, u, (0,500), p)
     reducedProb = ODEProblem(model, u, (0,500), p)
     actualSol = solve(actualProb, save_idxs=1)
-    modelSol = solve(reducedProb, save_idxs=1)
+    modelSol = solve(reducedProb, save_idxs=1)#, reltol=10^-12, abstol=10^-8)
     plot(actualSol, label="Full model")
+    println("Solved!")
+    plot!(modelSol, label="Reduced model")
+end
+
+"""
+Function to generate plots of the solved equations from both the full model and
+the reduced model with parameters subbed in for comparison
+"""
+function compareModelsNoParams(row = 100, model = symbolicmodelnoparams_ode!)
+    p = getP(datapoints, row)
+    u = getU(datapoints, row)
+    actualProb = ODEProblem(fullmodel_ode!, u, (0,500), p)
+    reducedProb = ODEProblem(model, u, (0,500), [])
+    actualSol = solve(actualProb, save_idxs=1)
+    modelSol = solve(reducedProb, save_idxs=1)#, reltol=10^-12, abstol=10^-8)
+    plot(actualSol, label="Full model")
+    println("Solved!")
     plot!(modelSol, label="Reduced model")
 end
 
@@ -181,5 +239,53 @@ function michaelisMenten!(rateEquations, eliminatedDifferential, eliminatedVar, 
         substitute(rateEquations[eliminatedVarSymbol], eliminatedDifferential=>0)
         LKsub = Symbolics.solve_for(rateEquations[eliminatedVarSymbol], eliminatedVar)
         map!(eq->(substitute(eq, (eliminatedVar=>LKsub, eliminatedDifferential=>0))), values(rateEquations))
+    end
+end
+
+"""
+More efficient implementation of the michaelisMenten function
+"""
+function fastMM!(rateEquations, eliminatedDifferential, eliminatedVar, eliminatedVarSymbol)
+    rateEquations[eliminatedVarSymbol] = 0 ~ rateEquations[eliminatedVarSymbol].rhs
+    subValue = Symbolics.solve_for(rateEquations[eliminatedVarSymbol], eliminatedVar) 
+    for key in keys(rateEquations)
+        eq = rateEquations[key]
+        if typeof(eq.lhs == 0) != Bool || eq.lhs != 0
+           rateEquations[key] = substitute(eq, (eliminatedVar=>subValue, eliminatedDifferential=>0))
+        end
+    end
+end
+
+function substituteParams(eqndict, symbol; oscdf=datapoints, row=100)
+    eqn = eqndict[symbol]
+    p = oscdf[row, :]
+    return substitute(eqn, (ka1=>p.ka1, kb1=>p.kb1, kcat1=>p.kcat1,
+                            ka2=>p.ka2, kb2=>p.kb2,
+                            ka3=>p.ka3, kb3=>p.kb3,
+                            ka4=>p.ka4, kb4=>p.kb4,
+                            ka7=>p.ka7, kb7=>p.kb7, kcat7=>p.kcat7,
+                            df=>p.DF))
+end
+
+"""
+Put in numeric values for a parameter set corresponding to a specific row
+"""
+function substituteParams!(eqndict, symbol; oscdf=datapoints, row=100)
+    eqn = eqndict[symbol]
+    p = oscdf[row, :]
+    return eqndict[symbol] = substitute(eqn, (ka1=>p.ka1, kb1=>p.kb1, kcat1=>p.kcat1,
+                            ka2=>p.ka2, kb2=>p.kb2,
+                            ka3=>p.ka3, kb3=>p.kb3,
+                            ka4=>p.ka4, kb4=>p.kb4,
+                            ka7=>p.ka7, kb7=>p.kb7, kcat7=>p.kcat7,
+                            df=>p.DF))
+end
+
+function simplifyAll!(rateEquations = rateEquations)
+    for key in keys(rateEquations)
+        eq = rateEquations[key]
+        if typeof(eq.lhs == 0) != Bool || eq.lhs != 0
+            rateEquations[key] = simplify(eq)
+        end
     end
 end
