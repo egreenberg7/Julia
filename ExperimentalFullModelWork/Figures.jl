@@ -1,8 +1,8 @@
 include("OutputHandling.jl")
 include("../UTILITIES/GillespieConverter.jl")
 
-oscdata = DataFrame(CSV.File("ExperimentalFullModelWork/MaybeOscValuesAnalysis/AllExpOsc.csv"))
-cd("ExperimentalFullModelWork/NoNegRunResultsCSVs")
+oscdata = DataFrame(CSV.File("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/MaybeOscValuesAnalysis/AllExpOsc.csv"))
+cd("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/NoNegRunResultsCSVs")
 alldata = getAllCSVs()
 cd("../..")
 
@@ -207,5 +207,5 @@ begin
     #ylabel!(plt, "Synaptojanin 1 (μM)")
     zlabel!(plt, "AP2 (μM)")
     plt
-    Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/oscillatoryParams1.png")
+    #Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/oscillatoryParams1.png")
 end 

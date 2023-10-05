@@ -22,3 +22,10 @@ for i in 1:size(oscdata)[1]
     Plots.plot!(exSolPlt, jumpSol.t[begin:100:end], GillespieConcSol[begin:100:end], label = "Gillespie Simulation", legend=:topright)
     savefig(exSolPlt, "/Users/ezragreenberg/Julia/ExperimentalFullModelWork/graphStorage/gillespiecomps/sol$i.png")
 end
+
+for i in 1:size(oscdata)[1]
+    sol = entryToSol(oscdata, i, tspan=5000.0)
+    exSolPlt = Plots.plot(sol, title="Representative Solution",
+        label="Numerical Solution", xlabel = "Time (s)", ylabel = "PIP (μM)", dpi=300, size = (600,400)) 
+    savefig(exSolPlt, "/Users/ezragreenberg/JLab/Julia/graphStorage/numSolutions/sol$i.png")
+end

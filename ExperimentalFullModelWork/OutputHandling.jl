@@ -401,3 +401,33 @@ function makeGroupGraph(df, labels)
     addConcProj(plt, oscdata)
     return plt
 end
+
+"""
+Same as above but with Period not L
+"""
+function makePerGraph(df)
+    plt = Plots.scatter3d(xlabel="PIP5K (μM)", ylabel="Synaptojanin (μM)", zlabel="AP2 (μM)", 
+                            title="Periods of Oscillatory Solutions",
+                            xlims = log10.((Krange[1], Krange[end])), ylims = log10.((Prange[1], Prange[end])),
+                            zlims = log10.((Arange[1], Arange[end])), clims = (0,2),
+                            formatter=x->"10^{$(round(x, digits=1))}",
+                            colorbar_formatter=x->"10^{$(round(x, digits=1))}", 
+                            #cbartitle="log(Period (s))",
+                            dpi=300)
+        #Lval = log10(i.L[1])
+        logL = log10.(df.per)
+        logx = log10.(df.K)
+        logy = log10.(df.P)
+        logz = log10.(df.A)
+        Plots.scatter3d!(plt, logx, logy, logz, marker_z = logL, labels = :none)
+    function addConcProj(plt, df; markershape=:circle)
+        numElems = size(df)[1]
+        scatter!(plt, log10.(df.K), log10.(df.P), fill(zlims(plt)[1], numElems), label=:none, markershape = markershape, alpha = 0.5, marker_z = logL, ms = 2)
+        scatter!(plt, log10.(df.K), fill(ylims(plt)[2], numElems), log10.(df.A), label=:none, markershape = markershape, alpha = 0.5, marker_z = logL, ms = 2)
+        scatter!(plt, fill(xlims(plt)[1], numElems), log10.(df.P), log10.(df.A), label=:none, markershape = markershape, alpha = 0.5, marker_z = logL, ms = 2)
+        plt
+    end
+    addConcProj(plt, oscdata)
+    Plots.gr_update_colorbar!
+    return plt
+end
