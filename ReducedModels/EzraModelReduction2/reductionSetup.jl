@@ -93,6 +93,27 @@ rateEquations  = Dict([:dL => (dL ~ kb1*AKL + kcat7*APLp + kb1*LK + kb1*LpAKL + 
 )
 
 """
+Rate equations with ome factorizations I did to decrease the number of substitutions
+I've done L, K, P, A, Lp; make sure to double check (especially Lp)
+"""
+rateEquationsWithFactorizations  = Dict([:dL => (dL ~ kb1*AKL + kcat7*APLp + kb1*LK + kb1*LpAKL + kcat7*LpAPLp + kcat7*LpP - ka1*L*(AK + K + df*LpAK))
+                :dK => (dK ~ LK*(kb1 + kcat1) + kb3*(AK + LpAK) - K*(ka1*L + ka3*(A + LpA)))
+                :dP => (dP ~ kb4*AP + kb4*LpAP + LpP*(kb7 + kcat7) - P*(ka4*(A + LpA) + ka7*Lp)) 
+                :dA => (dA ~ kb2*LpA + kb3*(AK + AKL) + kb4*(AP + APLp) - A*(ka2*Lp + ka3*(K + LK) + ka4*(LpP + P))) 
+                :dLp => (dLp ~ kb7*APLp + kcat1*AKL + kcat1*LK + kb2*LpA + kb2*LpAK + kb2*LpAKL + kb2*LpAP + kcat1*LpAKL + LpAPLp*(kb2 + kb7) + kb7*LpP - Lp*(ka2*(A + AK + df*(AKL + APLp)) + AP*(ka2 + ka7) + ka7*(P + df*LpAP))) 
+                :dLpA => (dLpA ~ kb3*LpAK + kb3*LpAKL + kb4*LpAP + kb4*LpAPLp + ka2*A*Lp - kb2*LpA - ka3*K*LpA - ka4*LpA*P - ka3*df*LK*LpA - ka4*df*LpA*LpP)
+                :dLK => (dLK ~ kb3*AKL + kb3*LpAKL + ka1*K*L - kb1*LK - kcat1*LK - ka3*A*LK - ka3*df*LK*LpA)
+                :dLpP => (dLpP ~ kb4*APLp + kb4*LpAPLp + ka7*Lp*P - kb7*LpP - kcat7*LpP - ka4*A*LpP - ka4*df*LpA*LpP)
+                :dLpAK => (dLpAK ~ kb1*LpAKL + kcat1*LpAKL + ka2*AK*Lp + ka3*K*LpA - kb2*LpAK - kb3*LpAK - ka1*df*L*LpAK)
+                :dLpAP => (dLpAP ~ kb7*LpAPLp + kcat7*LpAPLp + ka2*AP*Lp + ka4*LpA*P - kb2*LpAP - kb4*LpAP - ka7*df*Lp*LpAP)
+                :dLpAKL => (dLpAKL ~ ka1*df*L*LpAK + ka2*df*AKL*Lp + ka3*df*LK*LpA - kb1*LpAKL - kb2*LpAKL - kb3*LpAKL - kcat1*LpAKL)
+                :dLpAPLp => (dLpAPLp ~ ka2*df*APLp*Lp + ka7*df*Lp*LpAP + ka4*df*LpA*LpP - kb2*LpAPLp - kb4*LpAPLp - kb7*LpAPLp - kcat7*LpAPLp)
+                :dAK => (dAK ~ kb1*AKL + kb2*LpAK + kcat1*AKL + ka3*A*K - kb3*AK - ka1*AK*L - ka2*AK*Lp)
+                :dAP => (dAP ~ kb2*LpAP + kb7*APLp + kcat7*APLp + ka4*A*P - kb4*AP - ka2*AP*Lp - ka7*AP*Lp)
+                :dAKL => (dAKL ~ kb2*LpAKL + ka3*A*LK + ka1*AK*L - kb1*AKL - kb3*AKL - kcat1*AKL - ka2*df*AKL*Lp)
+                :dAPLp => (dAPLp ~ kb2*LpAPLp + ka7*AP*Lp + ka4*A*LpP - kb4*APLp - kb7*APLp - kcat7*APLp - ka2*df*APLp*Lp)]
+)
+"""
 Function to allow us to evaluate our reduced models through the DifferentialEquations packages.
 """
 function symbolicmodel_ode!(du, u, p, t; rateEquations = rateEquations)
@@ -112,7 +133,11 @@ function symbolicmodel_ode!(du, u, p, t; rateEquations = rateEquations)
             return val
         end
     end
-
+    differentials = [:dL, :dK, :dP, :dA, :dLp, :dLpA, :dLpA, :dLK, :dLpP, :dLpAK, :dLpAKL, :dLpAPLp, :dAK, :dAP, :dAKL, :dAPLp]
+    Threads.@threads for i in 1:16
+        du[i] = getDerivative[differentials[i]]
+    end
+    #=
     du[1] = getDerivative(:dL)
     du[2] = getDerivative(:dK)
     du[3] = getDerivative(:dP)
@@ -130,6 +155,7 @@ function symbolicmodel_ode!(du, u, p, t; rateEquations = rateEquations)
     du[15] = getDerivative(:dAKL)
     du[16] = getDerivative(:dAPLp)
     nothing
+    =#
 end
 
 
@@ -151,7 +177,14 @@ function symbolicmodelnoparams_ode!(du, u, p, t; rateEquationsSubbed = rateEquat
             return val
         end
     end
-
+    #=
+    differentials = [:dL, :dK, :dP, :dA, :dLp, :dLpA, :dLpA, :dLK, :dLpP, :dLpAK, :dLpAKL, :dLpAPLp, :dAK, :dAP, :dAKL, :dAPLp]
+    for i in 1:16
+        du[i] = getDerivative(differentials[i])
+    end
+    
+    nothing
+    =#
     du[1] = getDerivative(:dL)
     du[2] = getDerivative(:dK)
     du[3] = getDerivative(:dP)
@@ -174,7 +207,7 @@ end
 """
 Oscillatory datapoints from Jonathan that we can use to validate the reduced models
 """
-datapoints = DataFrame(CSV.File("ReducedModels/EzraModelReduction2/ezra_optimized_params.csv"))
+datapoints = DataFrame(CSV.File("/Users/ezragreenberg/Documents/Github/Julia/ReducedModels/EzraModelReduction2/ezra_optimized_params.csv"))
 
 """
 Function to extract parameters from dataframe
