@@ -5,10 +5,11 @@ for i in keys(rateEquations)
     substituteParams!(rateEquations, i)
 end
 
+simplifyAll!()
 #First we eliminate LK
 fastMM!(rateEquations, dLK, LK, :dLK)
 simplifyAll!()
-#compareModelsNoParams()
+compareModelsNoParams()
 
 #Now let's get rid of LpAK
 fastMM!(rateEquations, dLpAK, LpAK, :dLpAK)
@@ -31,7 +32,7 @@ fastMM!(rateEquations, dAKL, AKL, :dAKL)
 
 #Row 100 continues to work, the period has now decreased
 fastMM!(rateEquations, dAPLp, APLp, :dAPLp)
-compareModelsNoParams()
+#compareModelsNoParams()
 #compareModels(100)
 
 #We graph all the variables of the reduced model 
@@ -50,7 +51,7 @@ fastMM!(rateEquations, dLpP, LpP, :dLpP)
 
 #Still working after LpAP eliminated!!!
 fastMM!(rateEquations, dLpAP, LpAP, :dLpAP)
-compareModelsNoParams()
+#compareModelsNoParams()
 
 #I now save this intermediate reduced model so I can try out different things on it.
 RateEq4Var = deepcopy(rateEquations)
@@ -79,7 +80,14 @@ dLpAP
 dAK
 dAP
 =#
+#fastMM!(rateEquations, dP, P, :dP)
+#Instability if P eliminated
+#failure if K eliminated
+#islinear assertion if A eliminated
+#islinear assertion if Lp eliminated
+#islinear association if L eliminated
 fastMM!(rateEquations, dP, P, :dP)
+
 compareModelsNoParams()
 myP = getP(datapoints, 100)
 dLWithPSubstituted = substitute(rateEquations[:dL].rhs, myP[1])
