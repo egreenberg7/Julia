@@ -79,6 +79,7 @@ dAKL
 dLpAP
 dAK
 dAP
+dLK
 =#
 #fastMM!(rateEquations, dP, P, :dP)
 #Instability if P eliminated
