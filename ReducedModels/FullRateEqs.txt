@@ -1,66 +1,89 @@
 Rate Equations Form 1:
 
-dL == kb1*AKL + kcat7*APLp + kb1*LK + kb1*LpAKL + kcat7*LpAPLp + kcat7*LpP - ka1*AK*L - ka1*K*L - ka1*DF*L*LpAK 
-dLp == kb7*APLp + kcat1*AKL + kcat1*LK + kb2*LpA + kb2*LpAK + kb2*LpAKL + kb2*LpAP + kcat1*LpAKL + kb2*LpAPLp + kb7*LpAPLp + kb7*LpP - ka2*A*Lp - ka2*AK*Lp - ka2*AP*Lp - ka7*AP*Lp - ka7*Lp*P - ka2*DF*AKL*Lp - ka2*DF*APLp*Lp - ka7*DF*Lp*LpAP 
-dK == kb1*LK + kb3*AK + kcat1*LK + kb3*LpAK - ka3*A*K - ka1*K*L - ka3*K*LpA 
-dP == kb4*AP + kb4*LpAP + kb7*LpP + kcat7*LpP - ka4*A*P - ka7*Lp*P - ka4*LpA*P 
-dA == kb2*LpA + kb3*AK + kb3*AKL + kb4*AP + kb4*APLp - ka2*A*Lp - ka3*A*K - ka3*A*LK - ka4*A*LpP - ka4*A*P 
-dLpA == kb3*LpAK + kb3*LpAKL + kb4*LpAP + kb4*LpAPLp + ka2*A*Lp - kb2*LpA - ka3*K*LpA - ka4*LpA*P - ka3*DF*LK*LpA - ka4*DF*LpA*LpP 
-dLK == kb3*AKL + kb3*LpAKL + ka1*K*L - kb1*LK - kcat1*LK - ka3*A*LK - ka3*DF*LK*LpA 
-dLpP == kb4*APLp + kb4*LpAPLp + ka7*Lp*P - kb7*LpP - kcat7*LpP - ka4*A*LpP - ka4*DF*LpA*LpP 
-dLpAK == kb1*LpAKL + kcat1*LpAKL + ka2*AK*Lp + ka3*K*LpA - kb2*LpAK - kb3*LpAK - ka1*DF*L*LpAK 
-dLpAP == kb7*LpAPLp + kcat7*LpAPLp + ka2*AP*Lp + ka4*LpA*P - kb2*LpAP - kb4*LpAP - ka7*DF*Lp*LpAP 
-dLpAKL == ka1*DF*L*LpAK + ka2*DF*AKL*Lp + ka3*DF*LK*LpA - kb1*LpAKL - kb2*LpAKL - kb3*LpAKL - kcat1*LpAKL 
-dLpAPLp == ka2*DF*APLp*Lp + ka7*DF*Lp*LpAP + ka4*DF*LpA*LpP - kb2*LpAPLp - kb4*LpAPLp - kb7*LpAPLp - kcat7*LpAPLp 
-dAK == kb1*AKL + kb2*LpAK + kcat1*AKL + ka3*A*K - kb3*AK - ka1*AK*L - ka2*AK*Lp 
-dAP == kb2*LpAP + kb7*APLp + kcat7*APLp + ka4*A*P - kb4*AP - ka2*AP*Lp - ka7*AP*Lp 
-dAKL == kb2*LpAKL + ka3*A*LK + ka1*AK*L - kb1*AKL - kb3*AKL - kcat1*AKL - ka2*DF*AKL*Lp 
-dAPLp == kb2*LpAPLp + ka7*AP*Lp + ka4*A*LpP - kb4*APLp - kb7*APLp - kcat7*APLp - ka2*DF*APLp*Lp
+{dL == kb1*AKL + kcat7*APLp + kb1*LK + kb1*LpAKL + kcat7*LpAPLp + kcat7*LpP - ka1*AK*L - ka1*K*L - ka1*DF*L*LpAK,
+dLp == kb7*APLp + kcat1*AKL + kcat1*LK + kb2*LpA + kb2*LpAK + kb2*LpAKL + kb2*LpAP + kcat1*LpAKL + kb2*LpAPLp + kb7*LpAPLp + kb7*LpP - ka2*A*Lp - ka2*AK*Lp - ka2*AP*Lp - ka7*AP*Lp - ka7*Lp*P - ka2*DF*AKL*Lp - ka2*DF*APLp*Lp - ka7*DF*Lp*LpAP,
+dK == kb1*LK + kb3*AK + kcat1*LK + kb3*LpAK - ka3*A*K - ka1*K*L - ka3*K*LpA,
+dP == kb4*AP + kb4*LpAP + kb7*LpP + kcat7*LpP - ka4*A*P - ka7*Lp*P - ka4*LpA*P,
+dA == kb2*LpA + kb3*AK + kb3*AKL + kb4*AP + kb4*APLp - ka2*A*Lp - ka3*A*K - ka3*A*LK - ka4*A*LpP - ka4*A*P,
+dLpA == kb3*LpAK + kb3*LpAKL + kb4*LpAP + kb4*LpAPLp + ka2*A*Lp - kb2*LpA - ka3*K*LpA - ka4*LpA*P - ka3*DF*LK*LpA - ka4*DF*LpA*LpP,
+dLK == kb3*AKL + kb3*LpAKL + ka1*K*L - kb1*LK - kcat1*LK - ka3*A*LK - ka3*DF*LK*LpA,
+dLpP == kb4*APLp + kb4*LpAPLp + ka7*Lp*P - kb7*LpP - kcat7*LpP - ka4*A*LpP - ka4*DF*LpA*LpP,
+dLpAK == kb1*LpAKL + kcat1*LpAKL + ka2*AK*Lp + ka3*K*LpA - kb2*LpAK - kb3*LpAK - ka1*DF*L*LpAK,
+dLpAP == kb7*LpAPLp + kcat7*LpAPLp + ka2*AP*Lp + ka4*LpA*P - kb2*LpAP - kb4*LpAP - ka7*DF*Lp*LpAP,
+dLpAKL == ka1*DF*L*LpAK + ka2*DF*AKL*Lp + ka3*DF*LK*LpA - kb1*LpAKL - kb2*LpAKL - kb3*LpAKL - kcat1*LpAKL,
+dLpAPLp == ka2*DF*APLp*Lp + ka7*DF*Lp*LpAP + ka4*DF*LpA*LpP - kb2*LpAPLp - kb4*LpAPLp - kb7*LpAPLp - kcat7*LpAPLp,
+dAK == kb1*AKL + kb2*LpAK + kcat1*AKL + ka3*A*K - kb3*AK - ka1*AK*L - ka2*AK*Lp, 
+dAP == kb2*LpAP + kb7*APLp + kcat7*APLp + ka4*A*P - kb4*AP - ka2*AP*Lp - ka7*AP*Lp,
+dAKL == kb2*LpAKL + ka3*A*LK + ka1*AK*L - kb1*AKL - kb3*AKL - kcat1*AKL - ka2*DF*AKL*Lp,
+dAPLp == kb2*LpAPLp + ka7*AP*Lp + ka4*A*LpP - kb4*APLp - kb7*APLp - kcat7*APLp - ka2*DF*APLp*Lp}
+
+Dependent Variables: {L, Kin, P, Ada, Lp, LpA, LK, LpP, LpAK, LpAP, LpAKL, LpAPLp, AK, AP, AKL, APLp}
 
 Rate Equations Form 2:
+Capital K is a reserved name, and A also does not seem to work. As a result, I use Kin and Ada for them
 
-{L'[t] == kb1*AKL[t] + kcat7*APLp[t] + kb1*LK[t] + kb1*LpAKL[t] + kcat7*LpAPLp[t] + kcat7*LpP[t] - ka1*AK[t]*L[t] - ka1*K[t]*L[t] - ka1*DF*L[t]*LpAK[t] 
-Lp'[t] == kb7*APLp[t] + kcat1*AKL[t] + kcat1*LK[t] + kb2*LpA[t] + kb2*LpAK[t] + kb2*LpAKL[t] + kb2*LpAP[t] + kcat1*LpAKL[t] + kb2*LpAPLp[t] + kb7*LpAPLp[t] + kb7*LpP[t] - ka2*A[t]*Lp[t] - ka2*AK[t]*Lp[t] - ka2*AP[t]*Lp[t] - ka7*AP[t]*Lp[t] - ka7*Lp[t]*P[t] - ka2*DF*AKL[t]*Lp[t] - ka2*DF*APLp[t]*Lp[t] - ka7*DF*Lp[t]*LpAP[t] 
-K'[t] == kb1*LK[t] + kb3*AK[t] + kcat1*LK[t] + kb3*LpAK[t] - ka3*A[t]*K[t] - ka1*K[t]*L[t] - ka3*K[t]*LpA[t] 
-P'[t] == kb4*AP[t] + kb4*LpAP[t] + kb7*LpP[t] + kcat7*LpP[t] - ka4*A[t]*P[t] - ka7*Lp[t]*P[t] - ka4*LpA[t]*P[t] 
-A'[t] == kb2*LpA[t] + kb3*AK[t] + kb3*AKL[t] + kb4*AP[t] + kb4*APLp[t] - ka2*A[t]*Lp[t] - ka3*A[t]*K[t] - ka3*A[t]*LK[t] - ka4*A[t]*LpP[t] - ka4*A[t]*P[t] 
-LpA'[t] == kb3*LpAK[t] + kb3*LpAKL[t] + kb4*LpAP[t] + kb4*LpAPLp[t] + ka2*A[t]*Lp[t] - kb2*LpA[t] - ka3*K[t]*LpA[t] - ka4*LpA[t]*P[t] - ka3*DF*LK[t]*LpA[t] - ka4*DF*LpA[t]*LpP[t] 
-LK'[t] == kb3*AKL[t] + kb3*LpAKL[t] + ka1*K[t]*L[t] - kb1*LK[t] - kcat1*LK[t] - ka3*A[t]*LK[t] - ka3*DF*LK[t]*LpA[t] 
-LpP'[t] == kb4*APLp[t] + kb4*LpAPLp[t] + ka7*Lp[t]*P[t] - kb7*LpP[t] - kcat7*LpP[t] - ka4*A[t]*LpP[t] - ka4*DF*LpA[t]*LpP[t] 
-LpAK'[t] == kb1*LpAKL[t] + kcat1*LpAKL[t] + ka2*AK[t]*Lp[t] + ka3*K[t]*LpA[t] - kb2*LpAK[t] - kb3*LpAK[t] - ka1*DF*L[t]*LpAK[t] 
-LpAP'[t] == kb7*LpAPLp[t] + kcat7*LpAPLp[t] + ka2*AP[t]*Lp[t] + ka4*LpA[t]*P[t] - kb2*LpAP[t] - kb4*LpAP[t] - ka7*DF*Lp[t]*LpAP[t] 
-LpAKL'[t] == ka1*DF*L[t]*LpAK[t] + ka2*DF*AKL[t]*Lp[t] + ka3*DF*LK[t]*LpA[t] - kb1*LpAKL[t] - kb2*LpAKL[t] - kb3*LpAKL[t] - kcat1*LpAKL[t] 
-LpAPLp'[t] == ka2*DF*APLp[t]*Lp[t] + ka7*DF*Lp[t]*LpAP[t] + ka4*DF*LpA[t]*LpP[t] - kb2*LpAPLp[t] - kb4*LpAPLp[t] - kb7*LpAPLp[t] - kcat7*LpAPLp[t] 
-AK'[t] == kb1*AKL[t] + kb2*LpAK[t] + kcat1*AKL[t] + ka3*A[t]*K[t] - kb3*AK[t] - ka1*AK[t]*L[t] - ka2*AK[t]*Lp[t] 
-AP'[t] == kb2*LpAP[t] + kb7*APLp[t] + kcat7*APLp[t] + ka4*A[t]*P[t] - kb4*AP[t] - ka2*AP[t]*Lp[t] - ka7*AP[t]*Lp[t] 
-AKL'[t] == kb2*LpAKL[t] + ka3*A[t]*LK[t] + ka1*AK[t]*L[t] - kb1*AKL[t] - kb3*AKL[t] - kcat1*AKL[t] - ka2*DF*AKL[t]*Lp[t] 
-APLp'[t] == kb2*LpAPLp[t] + ka7*AP[t]*Lp[t] + ka4*A[t]*LpP[t] - kb4*APLp[t] - kb7*APLp[t] - kcat7*APLp[t] - ka2*DF*APLp[t]*Lp[t]}
+{L'[t] == kb1*AKL[t] + kcat7*APLp[t] + kb1*LK[t] + kb1*LpAKL[t] + kcat7*LpAPLp[t] + kcat7*LpP[t] - ka1*AK[t]*L[t] - ka1*Kin[t]*L[t] - ka1*DF*L[t]*LpAK[t],
+Lp'[t] == kb7*APLp[t] + kcat1*AKL[t] + kcat1*LK[t] + kb2*LpA[t] + kb2*LpAK[t] + kb2*LpAKL[t] + kb2*LpAP[t] + kcat1*LpAKL[t] + kb2*LpAPLp[t] + kb7*LpAPLp[t] + kb7*LpP[t] - ka2*Ada[t]*Lp[t] - ka2*AK[t]*Lp[t] - ka2*AP[t]*Lp[t] - ka7*AP[t]*Lp[t] - ka7*Lp[t]*P[t] - ka2*DF*AKL[t]*Lp[t] - ka2*DF*APLp[t]*Lp[t] - ka7*DF*Lp[t]*LpAP[t],
+Kin'[t] == kb1*LK[t] + kb3*AK[t] + kcat1*LK[t] + kb3*LpAK[t] - ka3*Ada[t]*Kin[t] - ka1*Kin[t]*L[t] - ka3*Kin[t]*LpA[t],
+P'[t] == kb4*AP[t] + kb4*LpAP[t] + kb7*LpP[t] + kcat7*LpP[t] - ka4*Ada[t]*P[t] - ka7*Lp[t]*P[t] - ka4*LpA[t]*P[t], 
+Ada'[t] == kb2*LpA[t] + kb3*AK[t] + kb3*AKL[t] + kb4*AP[t] + kb4*APLp[t] - ka2*Ada[t]*Lp[t] - ka3*Ada[t]*Kin[t] - ka3*Ada[t]*LK[t] - ka4*Ada[t]*LpP[t] - ka4*Ada[t]*P[t],
+LpA'[t] == kb3*LpAK[t] + kb3*LpAKL[t] + kb4*LpAP[t] + kb4*LpAPLp[t] + ka2*Ada[t]*Lp[t] - kb2*LpA[t] - ka3*Kin[t]*LpA[t] - ka4*LpA[t]*P[t] - ka3*DF*LK[t]*LpA[t] - ka4*DF*LpA[t]*LpP[t],
+LK'[t] == kb3*AKL[t] + kb3*LpAKL[t] + ka1*Kin[t]*L[t] - kb1*LK[t] - kcat1*LK[t] - ka3*Ada[t]*LK[t] - ka3*DF*LK[t]*LpA[t], 
+LpP'[t] == kb4*APLp[t] + kb4*LpAPLp[t] + ka7*Lp[t]*P[t] - kb7*LpP[t] - kcat7*LpP[t] - ka4*Ada[t]*LpP[t] - ka4*DF*LpA[t]*LpP[t],
+LpAK'[t] == kb1*LpAKL[t] + kcat1*LpAKL[t] + ka2*AK[t]*Lp[t] + ka3*Kin[t]*LpA[t] - kb2*LpAK[t] - kb3*LpAK[t] - ka1*DF*L[t]*LpAK[t],
+LpAP'[t] == kb7*LpAPLp[t] + kcat7*LpAPLp[t] + ka2*AP[t]*Lp[t] + ka4*LpA[t]*P[t] - kb2*LpAP[t] - kb4*LpAP[t] - ka7*DF*Lp[t]*LpAP[t], 
+LpAKL'[t] == ka1*DF*L[t]*LpAK[t] + ka2*DF*AKL[t]*Lp[t] + ka3*DF*LK[t]*LpA[t] - kb1*LpAKL[t] - kb2*LpAKL[t] - kb3*LpAKL[t] - kcat1*LpAKL[t],
+LpAPLp'[t] == ka2*DF*APLp[t]*Lp[t] + ka7*DF*Lp[t]*LpAP[t] + ka4*DF*LpA[t]*LpP[t] - kb2*LpAPLp[t] - kb4*LpAPLp[t] - kb7*LpAPLp[t] - kcat7*LpAPLp[t],
+AK'[t] == kb1*AKL[t] + kb2*LpAK[t] + kcat1*AKL[t] + ka3*Ada[t]*Kin[t] - kb3*AK[t] - ka1*AK[t]*L[t] - ka2*AK[t]*Lp[t],
+AP'[t] == kb2*LpAP[t] + kb7*APLp[t] + kcat7*APLp[t] + ka4*Ada[t]*P[t] - kb4*AP[t] - ka2*AP[t]*Lp[t] - ka7*AP[t]*Lp[t],
+AKL'[t] == kb2*LpAKL[t] + ka3*Ada[t]*LK[t] + ka1*AK[t]*L[t] - kb1*AKL[t] - kb3*AKL[t] - kcat1*AKL[t] - ka2*DF*AKL[t]*Lp[t],
+APLp'[t] == kb2*LpAPLp[t] + ka7*AP[t]*Lp[t] + ka4*Ada[t]*LpP[t] - kb4*APLp[t] - kb7*APLp[t] - kcat7*APLp[t] - ka2*DF*APLp[t]*Lp[t]}
 
 Parameters of datapoints 100 from Jonathan, used for model testing
 
-ka1 -> 1.001107643323893
-kb1 -> 281.14082293412173
-kcat1 -> 0.251
-ka2 -> 2.0300503992293732
-kb2 -> 0.9954105411980301
-ka3 -> 0.19893600692804198
-kb3 -> 0.24254011544624787
-ka4 -> 0.001
-kb4 -> 0.001
-ka7 -> 2.768126898343966
-kb7-> 0.14464903871512103
-kcat7 -> 0.5821403067955622
-DF -> 14185.701046371441
+{ka1 -> 1.001107643323893,
+kb1 -> 281.14082293412173,
+kcat1 -> 0.251,
+ka2 -> 2.0300503992293732,
+kb2 -> 0.9954105411980301,
+ka3 -> 0.19893600692804198,
+kb3 -> 0.24254011544624787,
+ka4 -> 0.001,
+kb4 -> 0.001,
+ka7 -> 2.768126898343966,
+kb7-> 0.14464903871512103,
+kcat7 -> 0.5821403067955622,
+DF -> 14185.701046371441}
 
 Initial Conditions of row 100:
 {3.0, 0.5, 0.3, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
 
+{L[0]==3.0, 
+Kin[0]==0.5,
+P[0]==0.3,
+Ada[0]==2.0,
+Lp[0]==0.0,
+LpA[0]==0.0,
+LK[0]==0.0,
+LpP[0]==0.0,
+LpAK[0]==0.0,
+LpAP[0]==0.0,
+LpAKL==0.0,
+LpAPLp[0]==0.0,
+AK[0]==0.0,
+AP[0]==0.0,
+AKL[0]==0.0,
+APLp[0]==0.0}
+
+Row 100 Initial concentrations
+{{Ltot -> 3.0}, {Ktot -> 0.5}, {Ptot -> 0.3}, {Atot -> 2.0}}
+
 Mass Conservation:
 
-Ltot == L + Lp + LpA + LK + LpP + LpAK + LpAP + 2 * LpAKL +  2 * LpAPLp + AKL + APLp
-Ptot == P + LpP + LpAP + LpAPLp + AP + APLp
-Ktot == K + LK + LpAK + LpAKL + AK + AKL
-Atot == A + LpA + LpAK + LpAP + LpAKL + LpAPLp + AK + AP + AKL + APLp
+{Ltot == L[t]+ Lp[t]+ LpA[t]+ LK[t]+ LpP[t]+ LpAK[t]+ LpAP[t]+ 2 * LpAKL[t]+  2 * LpAPLp[t]+ AKL[t]+ APLp[t],
+Ptot == P[t]+ LpP[t]+ LpAP[t]+ LpAPLp[t]+ AP[t]+ APLp[t],
+Ktot ==Kin[t]+ LK[t]+ LpAK[t]+ LpAKL[t]+ AK[t]+ AKL[t],
+Atot == Ada[t]+ LpA[t]+ LpAK[t]+ LpAP[t]+ LpAKL[t]+ LpAPLp[t]+ AK[t]+ AP[t]+ AKL[t]+ APLp[t]}
 
 ParameterSubstitutions Based on Experimental Values:
 Km1 == (kb1 + kcat1) / ka1
