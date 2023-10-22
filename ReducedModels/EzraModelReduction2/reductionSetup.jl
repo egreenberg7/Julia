@@ -133,11 +133,6 @@ function symbolicmodel_ode!(du, u, p, t; rateEquations = rateEquations)
             return val
         end
     end
-    differentials = [:dL, :dK, :dP, :dA, :dLp, :dLpA, :dLpA, :dLK, :dLpP, :dLpAK, :dLpAKL, :dLpAPLp, :dAK, :dAP, :dAKL, :dAPLp]
-    Threads.@threads for i in 1:16
-        du[i] = getDerivative[differentials[i]]
-    end
-    #=
     du[1] = getDerivative(:dL)
     du[2] = getDerivative(:dK)
     du[3] = getDerivative(:dP)
@@ -155,7 +150,6 @@ function symbolicmodel_ode!(du, u, p, t; rateEquations = rateEquations)
     du[15] = getDerivative(:dAKL)
     du[16] = getDerivative(:dAPLp)
     nothing
-    =#
 end
 
 
