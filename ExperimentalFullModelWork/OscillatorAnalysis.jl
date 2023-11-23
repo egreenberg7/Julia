@@ -1,4 +1,5 @@
 include("OutputHandling.jl")
+using StatsPlots
 
 oscdata = DataFrame(CSV.File("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/MaybeOscValuesAnalysis/AllExpOsc.csv"))
 
@@ -94,4 +95,27 @@ function getAllMinDfs!(dFrame=trulyOscData; savefile = true, filename = "Experim
     end
 end
 
-getAllMinDfs!() 
+#getAllMinDfs!() 
+
+moreData = CSV.read("ExperimentalFullModelWork/paramsWithMinDF.csv", DataFrame)
+@df moreData scatter(log10.(:L), log10.(:minimumDF))
+
+function scatterParams(dFrame, param1, param2)
+    scatter(log10.(dFrame[:,param1]), log10.(dFrame[:,param2]), xlabel=param1, ylabel=param2, title="Truly Log10")
+end
+
+function pairwiseScatters(dFrame)
+    numParams = size(names(dFrame))[1]
+    params = propertynames(dFrame)
+    deleteat!(params, numParams - 2)
+    for i in 1:(numParams - 2)
+        for j in (i+1):numParams - 1
+            display(scatterParams(dFrame, params[i], params[j]))
+        end
+    end
+end
+
+pairwiseScatters(moreData)
+
+evenMoreData = moreData
+evenMoreData.NormalizedAmp = evenMoreData.amp ./ evenMoreData.L
