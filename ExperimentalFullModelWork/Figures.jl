@@ -209,3 +209,25 @@ begin
     plt
     #Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/oscillatoryParams1.png")
 end 
+
+
+#Miscelanneous statistical plots
+scatter(log10.(oscdata.K), log10.(oscdata.A))
+scatter((oscdata.K), (oscdata.P))
+using StatsPlots
+using GLM
+ols = lm(@formula(log10(K)~log10(A)), oscdata)
+
+@df oscdata scatter(:ka1, :ka4)
+using PlotlyJS
+PlotlyJS.plot(oscdata,y=:A,kind="box",Layout(yaxis_type="log"))
+
+num = 900
+Plots.plot(entryToSol(oscdata,num;tspan=5000,save_idxs=[10,11]),labels=["LpAP" "LpAKL"])
+Plots.plot(entryToSol(oscdata, num; tspan=5000, save_idxs=[1,2,5,6,10,11]),labels=["L" "K" "Lp" "LpA" "LpAP" "LpAKL"], xlims=(100,1000), ylims=(0,1))
+Plots.plot(entryToSol(oscdata,num;tspan=1000, save_idxs=[1,2,5,6,10,11]),labels=["L" "K" "Lp" "LpA" "LpAP" "LpAKL"])
+# for i in 1:1008
+#     x = Plots.plot(entryToSol(oscdata, i; tspan=5000, save_idxs=[1,2,3]))
+#     Plots.savefig(x,"graphstorage2/OscdataSolution$i.png")
+# end
+
