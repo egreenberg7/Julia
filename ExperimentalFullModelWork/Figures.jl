@@ -1,10 +1,12 @@
 include("OutputHandling.jl")
 include("../UTILITIES/GillespieConverter.jl")
 
-oscdata = DataFrame(CSV.File("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/MaybeOscValuesAnalysis/AllExpOsc.csv"))
-cd("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/NoNegRunResultsCSVs")
-alldata = getAllCSVs()
-cd("../..")
+#oscdata = DataFrame(CSV.File("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/MaybeOscValuesAnalysis/AllExpOsc.csv"))
+oscdata = CSV.read("/Users/ezragreenberg/Documents/GitHub/Julia/ExperimentalFullModelWork/paramsWithMinDF.csv", DataFrame)
+
+# cd("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/NoNegRunResultsCSVs")
+# alldata = getAllCSVs()
+# cd("../..")
 
 oscParams = unique(oscdata[:, [:ka1, :ka4, :ka7, :kb1]])
 allParams = unique(removeBadValues(alldata)[:, [:ka1, :ka4, :ka7, :kb1]])
@@ -44,6 +46,7 @@ function addConcPlt(plt, df; markershape=:circle)
     scatter!(plt, log10.(df.K), log10.(df.P), log10.(df.A), label="10^{$(log10(df.L[1]))}", markershape = markershape, alpha = 0.5)
     plt
 end
+
 function addConcProj(plt, df; markershape=:circle)
     numElems = size(df)[1]
     scatter!(plt, log10.(df.K), log10.(df.P), fill(zlims(plt)[1], numElems), label=:none, markershape = markershape, alpha = 0.5, color = :black, ms = 2)
@@ -79,7 +82,7 @@ begin
     zlabel!(plt, "ka7 (μM/s)")
     title!(plt, "Oscillatory Parameters:\n Dimensionality Factor = 10,000")
     plt
-    Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/oscillatoryParams.png")
+    Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/trulyOscillatoryParams.png")
 end 
 
 #Code to create zoomed out graph of oscillatory params
@@ -114,10 +117,10 @@ begin
     zlabel!(plt, "ka7 (μM/s)")
     title!(plt, "Oscillatory Parameters:\n Dimensionality Factor = 10,000")
     plt
-    Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/oscillatoryParamsOut.png")
+    Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/trulyOscillatoryParamsOut.png")
 end
 
-#Code to create plot of search space 
+#Code to create plot of search space of parameters
 begin
     searchPLT = Plots.scatter3d([],[],[],
         xlims=(log10(kaRange[1]), log10(kaRange[end])), 
@@ -144,11 +147,71 @@ begin
     Plots.savefig(searchPLT,"ExperimentalFullModelWork/graphStorage/searchspace.png")
 end
 
+#Code to create plot of primary search space for concentrations
+begin
+    include("ConcentrationClassification.jl")
+    r = getu0Ranges()
+    searchPLT = Plots.scatter3d([],[],[],
+        xlims=(log10(Krange[1]), log10(Krange[end])), 
+        ylims = (log10(Prange[1]), log10(Prange[end])), 
+        zlims = (log10(Arange[1]), log10(Arange[end])), 
+        legendtitle="PIP (μM)", 
+        label=:none,
+        legend=:topright,
+        title = "Concentration Primary Search Space",
+        xlabel = "PIP5K (μM)",
+        #ylabel = " (μM)",
+        zlabel = "AP2 (μM)",
+        xtickfontsize = 6,
+        ytickfontsize = 6,
+        ztickfontsize = 6,
+        dpi = 300,
+        formatter = x->"10^{$x}")
+    #for i in log10.(r[:L])
+        scatter3d!(searchPLT, [],[],[],label = "10^{-2.0} to 10.^{2.0} by Increments of √10", shape = :circle, color=:black)
+    #end
+    cRangeDict = Dict([:L => Lrange, :K=>Krange,:A=>Arange,:P=>Prange])
+    addConcProj(searchPLT, DataFrame(getConcentrationCombos(cRangeDict)))
+    searchPLT
+    Plots.savefig(searchPLT,"ExperimentalFullModelWork/graphStorage/Concentrationsearchspace1.png")
+end
+
+#Code to create plot of secondary search space of concentrations
+begin
+    include("ConcentrationClassification.jl")
+    r = getu0Ranges()
+    searchPLT = Plots.scatter3d([],[],[],
+        xlims=(log10(r[:K][1]), log10(r[:K][end])), 
+        ylims = (log10(r[:P][1]), log10(r[:P][end])), 
+        zlims = (log10(r[:A][1]), log10(r[:A][end])), 
+        legendtitle="PIP (μM)", 
+        label=:none,
+        legend=:topright,
+        title = "Concentration Secondary Search Space",
+        xlabel = "PIP5K (μM)",
+        #ylabel = " (μM)",
+        zlabel = "AP2 (μM)",
+        xtickfontsize = 6,
+        ytickfontsize = 6,
+        ztickfontsize = 6,
+        dpi = 300,
+        formatter = x->"10^{$x}")
+    #for i in log10.(r[:L])
+        scatter3d!(searchPLT, [],[],[],label = "10^{-2.0} to 10.^{2.0} by Increments of 10^{0.2}", shape = :circle, color=:black)
+    #end
+    addConcProj(searchPLT, getConcentrationCombos(getu0Ranges()))
+    searchPLT
+    Plots.savefig(searchPLT,"ExperimentalFullModelWork/graphStorage/Concentrationsearchspace.png")
+end 
+
+#Code to create plot of oscillatory concentrations
+x = makeConcentrationGraph(oscdata)
+savefig(x, "ExperimentalFullModelWork/graphStorage/OscillatoryConcentrations.png")
 
 #Representative parameter combination 
 paramset = oscdata[oscdata[:, :ka1].==0.1 .&& oscdata[:,:kb1] .== 0.1 .&& oscdata[:, :ka7] .== 10^0.6 .&& oscdata[:, :ka4] .== 10 ^-2.5,:]
-u0Graph = make3DAmpGraph(paramset)
-Plots.savefig(u0Graph, "ExperimentalFullModelWork/graphStorage/u0graph.png")
+#u0Graph = make3DAmpGraph(paramset)
+#Plots.savefig(u0Graph, "ExperimentalFullModelWork/graphStorage/u0graph.png")
 
 sol = entryToSol(paramset, 5, tspan=600)
 exSolPlt = Plots.plot(sol, title="Representative Solution",
@@ -213,6 +276,7 @@ end
 
 #Miscelanneous statistical plots
 scatter(log10.(oscdata.K), log10.(oscdata.A))
+scatter(log10.((oscdata.ka1 .* Km1exp .- oscdata.kb1)),(oscdata.L))
 scatter((oscdata.K), (oscdata.P))
 using StatsPlots
 using GLM
