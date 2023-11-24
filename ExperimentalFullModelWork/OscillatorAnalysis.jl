@@ -1,5 +1,6 @@
 include("OutputHandling.jl")
 using StatsPlots
+using GLM
 
 oscdata = DataFrame(CSV.File("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/MaybeOscValuesAnalysis/AllExpOsc.csv"))
 
@@ -100,17 +101,22 @@ end
 moreData = CSV.read("ExperimentalFullModelWork/paramsWithMinDF.csv", DataFrame)
 @df moreData scatter(log10.(:L), log10.(:minimumDF))
 
-function scatterParams(dFrame, param1, param2)
-    scatter(log10.(dFrame[:,param1]), log10.(dFrame[:,param2]), xlabel=param1, ylabel=param2, title="Truly Log10")
+function scatterParamsLog(dFrame, param1, param2)
+    scatter(log10.(dFrame[:,param1]), log10.(dFrame[:,param2]), xlabel=param1, ylabel=param2, title="Log plot: " * param2 * " vs " * param1)
 end
+
+function scatterParams(dFrame, param1, param2)
+    scatter((dFrame[:,param1]), (dFrame[:,param2]), xlabel=param1, ylabel=param2, title="Linear plot: " * param2 * " vs " * param1)
+end
+
 
 function pairwiseScatters(dFrame)
     numParams = size(names(dFrame))[1]
-    params = propertynames(dFrame)
-    deleteat!(params, numParams - 2)
-    for i in 1:(numParams - 2)
-        for j in (i+1):numParams - 1
-            display(scatterParams(dFrame, params[i], params[j]))
+    params = names(dFrame)
+    deleteat!(params, numParams - 1)
+    for i in 1:(numParams - 1)
+        for j in (i+1):numParams - 2
+            display(scatterParamsLog(dFrame, params[i], params[j]))
         end
     end
 end
@@ -119,3 +125,6 @@ pairwiseScatters(moreData)
 
 evenMoreData = moreData
 evenMoreData.NormalizedAmp = evenMoreData.amp ./ evenMoreData.L
+
+KinAdaLogLog = lm(@formula(log10(K)~log10(A)), oscdata)
+@df moreData scatter(log.(:ka1), :per)
