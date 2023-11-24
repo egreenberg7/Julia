@@ -322,7 +322,7 @@ end
 """
 Take dataframe of concentrations and make graph where colors represent lipids.
 """
-function make3DAmpGraph(mydf)
+function makeConcentrationGraph(mydf)
     df = mydf
     x = df.K #K
     y = df.P #P 
@@ -339,7 +339,7 @@ function make3DAmpGraph(mydf)
     graph = Plots.plot(Plots.scatter(log_x,log_y,constantTwos,marker_z=colorVals,markershape= :xcross,alpha=0.5,ms=2))
     Plots.scatter!(graph, log_x,-constantTwos,log_z,marker_z=colorVals,markershape= :xcross, alpha=0.5,ms=2)
     Plots.scatter!(graph, constantThrees,log_y,log_z,markershape= :xcross,marker_z=colorVals,alpha=0.5,ms=2)
-    Plots.scatter!(graph, constantTwos,log_y,log_z,marker_z=colorVals, markershape= :xcross,alpha=0.5,ms=2)
+    Plots.scatter!(graph, constantThrees,log_y,log_z,marker_z=colorVals, markershape= :xcross,alpha=0.5,ms=2)
     Plots.scatter!(graph,
         log_x,
         log_y,
@@ -347,24 +347,25 @@ function make3DAmpGraph(mydf)
         marker_z=colorVals,
         formatter=x->"10^{$x}",
         colorbar_formatter=x->"10^{$x}",
-        colorbar_discrete_values = unique(colorVals), 
-        color = palette(:default, length(unique(colorVals))),
-        title="Oscillatory Initial concentrations",
+        #colorbar_discrete_values = unique(colorVals), 
+        #color = palette(:thermal, length(unique(colorVals))),
+        title="Oscillatory Initial Concentrations",
         titlefontsize = 14,
-        xlims=(-2,2),
-        ylims=(-2,2),
+        xlims=(-3,2),
+        ylims=(-3,2),
         zlims=(-2,2),
         legend=:none,
         markerstrokealpha=0,
         markersize = 3,
         markerstrokewidth = 0.2,
         xaxis="PIP5K (μM)",
-        yaxis="Synaptojanin (μM)",
+        #yaxis="Synaptojanin (μM)",
         zaxis="AP2 (μM)",
+        dpi = 600,
         xguidefontsize=12,
         yguidefontsize = 12,
-        zguidefontsize=12,
-        colorbar_title=("PIP (μM)"))#,
+        zguidefontsize=12)#,
+        #colorbar_title=("PIP (μM)")),
         #xticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]), 
         #zticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]),
         #yticks=(-2:2,[L"$10^{-2}$",L"$10^{-1}$",L"$10^{0}$",L"$10^{1}$",L"$10^{2}$"]))
