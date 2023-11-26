@@ -1,5 +1,10 @@
 include("OutputHandling.jl")
 include("../UTILITIES/GillespieConverter.jl")
+using StatsPlots
+using GLM
+using LaTeXStrings
+
+PLOTS_DEFAULTS=(Dict(:dpi=>600))
 
 #oscdata = DataFrame(CSV.File("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/MaybeOscValuesAnalysis/AllExpOsc.csv"))
 oscdata = CSV.read("/Users/ezragreenberg/Documents/GitHub/Julia/ExperimentalFullModelWork/paramsWithMinDF.csv", DataFrame)
@@ -55,6 +60,22 @@ function addConcProj(plt, df; markershape=:circle)
     plt
 end
 
+#TODO Add correct legend labels, move to 1 plot with 4 subplots
+function solutionsGroupedBySpecies(row; df = oscdata, tspan = 600)
+    speciesIndices = Dict([:L => 1, :K => 2, :P => 3, :A => 4, :Lp => 5, :LpA => 6, :LK => 7, 
+        :LpP => 8, :LpAK => 9, :LpAP => 10, :LpAKL => 11, :LpAPLp => 12, :AK => 13, :AP => 14, 
+        :AKL => 15, :APLp => 16])
+    #L, Lp
+    lipids = [1, 2]
+    #A, LpA
+    adaptors = [4, 6]
+    kinases = [speciesIndices[i] for i in [:K, :LK, :LpAK, :LpAKL, :AK, :AKL]]
+    phosphatases = [speciesIndices[i] for i in [:P, :LpP, :LpAP, :LpAPLp, :AP, :APLp]]
+    speciesTypes = [lipids, adaptors, kinases, phosphatases]
+    solutions = [entryToSol(oscdata, row; tspan = tspan, save_idxs = i) for i in speciesTypes]
+    plots = [plot(i) for i in solutions]
+    #plot(plots, layout=4) 
+end  
 
 #Code to create zoomed in graph of oscillatory rate constants
 begin 
@@ -204,6 +225,83 @@ begin
     Plots.savefig(searchPLT,"ExperimentalFullModelWork/graphStorage/Concentrationsearchspace.png")
 end 
 
+#Code to create K vs A very nicely
+begin
+    regLine = lm(@formula(log10(K)~log10(A)), oscdata)
+    scatter(log10.(oscdata.K), log10.(oscdata.A), 
+        xaxis="AP2 (μM)", yaxis="PIP5K (μM)", smooth = true,
+        formatter=x->"10^{$x}",
+        label=:none,
+        color=:black,
+        legendfontsize=10,
+        title="Initial Kinase and Adaptor Concentrations")
+    plot!([],[],ms=0,color="white",label=L"PIP5K = 1.46 * AP2^{0.955}")
+    plot!([],[],ms=0,color="white",label=L"r^2 = 0.933", 
+    dpi = 600)
+    savefig("ExperimentalFullModelWork/graphStorage/KvsA.png")
+end
+
+#Code to create L vs A nicely NOT REALLY CLEAR CORRELATION
+begin
+    regLine = lm(@formula(log10(L)~log10(A)), oscdata)
+    scatter(log10.(oscdata.L), log10.(oscdata.A), 
+        xaxis="AP2 (μM)", yaxis="PIP2 (μM)", smooth = true,
+        formatter=x->"10^{$x}",
+        label=:none,
+        color=:black,
+        legendfontsize=10,
+        title="Initial Lipid and Adaptor Protein Concentrations")
+    plot!([],[],ms=0,color="white",label=L"PIP5K = 1.46 * AP2^{0.955}")
+    plot!([],[],ms=0,color="white",label=L"r^2 = 0.933", 
+    dpi = 600)
+    #savefig("ExperimentalFullModelWork/graphStorage/LvsA.png")
+end
+
+#Code to plot P vs Period very nicely
+begin
+    regLine = lm(@formula(log10(per)~log10(P)), oscdata)
+    constantMultiplier = round(10^coef(regLine)[1],digits=3)
+    exponent = round(coef(regLine)[2], digits = 3)
+    correlation = round(r2(regLine), digits = 3)
+    residualPlot=scatter(log10.(oscdata.P), predict(regLine, oscdata).-log10.(oscdata.per),ylims=(-0.4,0.4))
+    scatter(log10.(oscdata.per), log10.(oscdata.P), 
+        xaxis="Synaptojanin (μM)", yaxis="Period (s)", smooth = true,
+        formatter=x->"10^{$x}",
+        label=:none,
+        linecolor=:black,
+        mc=:blue,
+        legendfontsize=10,
+        title="Period vs Initial Phosphatase Concentration",
+        linewidth = 3,
+        linestyle=:dash,
+        dpi=600)
+    plot!([],[],ms=0,color="white",label=L"Period = %$constantMultiplier * Synaptojanin^{%$exponent}")
+    plot!([],[],ms=0,color="white",label=L"r^2 = %$correlation")
+    savefig("ExperimentalFullModelWork/graphStorage/PerVsP.png")
+end
+
+begin
+    regLine = lm(@formula(log10(per)~log10(ka4)), oscdata)
+    constantMultiplier = round(10^coef(regLine)[1],digits=3)
+    exponent = round(coef(regLine)[2], digits = 3)
+    correlation = round(r2(regLine), digits = 3)
+    residualPlot=scatter(log10.(oscdata.ka4), predict(regLine, oscdata).-log10.(oscdata.per),ylims=(-0.4,0.4))
+    scatter(log10.(oscdata.per), log10.(oscdata.ka4), 
+        xaxis="Rate Constant for Binding of Synaptojanin to AP2 1/(μM*̇s)", yaxis="Period (s)", smooth = true,
+        formatter=x->"10^{$(round(x,digits=2))}",
+        label=:none,
+        linecolor=:black,
+        mc=:blue,
+        legendfontsize=10,
+        title="Period vs Binding Rate of Phosphatase to Adaptor",
+        linewidth = 3,
+        linestyle=:dash,
+        dpi = 600)
+    plot!([],[],ms=0,color="white",label=L"Period = %$constantMultiplier * k_{on}^{%$exponent}")
+    plot!([],[],ms=0,color="white",label=L"r^2 = %$correlation")
+    savefig("ExperimentalFullModelWork/graphStorage/PerVska4.png")
+end
+
 #Code to create plot of oscillatory concentrations
 x = makeConcentrationGraph(oscdata)
 savefig(x, "ExperimentalFullModelWork/graphStorage/OscillatoryConcentrations.png")
@@ -232,6 +330,7 @@ p=getP(paramset, 5)
     plot!(exSolPlt, jumpSol.t, GillespieConcSol, label = "Gillespie Simulation", legend=:topright)
     xlabel!(exSolPlt, "Time (s)")
 savefig(exSolPlt, "ExperimentalFullModelWork/graphStorage/exampleSol5.png")
+
 #Code to create a concentration plot
 begin 
     groupedDFC = groupby(paramset, :L)
@@ -275,12 +374,8 @@ end
 
 
 #Miscelanneous statistical plots
-scatter(log10.(oscdata.K), log10.(oscdata.A))
 scatter(log10.((oscdata.ka1 .* Km1exp .- oscdata.kb1)),(oscdata.L))
 scatter((oscdata.K), (oscdata.P))
-using StatsPlots
-using GLM
-ols = lm(@formula(log10(K)~log10(A)), oscdata)
 
 @df oscdata scatter(:ka1, :ka4)
 using PlotlyJS
