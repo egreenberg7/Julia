@@ -72,3 +72,33 @@ function classifyConcentrations(p, u0RangeDict; u0 = zeros(16), savedata = true,
     return df
 end
 
+function getConcentrationCombos(u0RangeDict; u0 = zeros(16), savedata = false, filename="ConcentrationOutput")
+    numU0 = 1
+    for rng in values(u0RangeDict) numU0 *= length(rng) end
+    data = Dict(:L=>zeros(numU0), :K=>zeros(numU0), :P=>zeros(numU0), :A=>zeros(numU0))
+    count = 1
+    for L in u0RangeDict[:L]
+        u0[1] = L
+        for K in u0RangeDict[:K]
+            u0[2] = K
+            for P in u0RangeDict[:P]
+                u0[3] = P
+                for A in u0RangeDict[:A]
+                    u0[4] = A
+                    data[:L][count] = L
+                    data[:K][count] = K
+                    data[:P][count] = P
+                    data[:A][count] = A
+                    count += 1
+                end
+            end
+        end
+    end
+    df=DataFrame(data)
+    if savedata
+        CSV.write("$(filename).csv", df)
+        cd("..")
+    end
+    return df
+end
+
