@@ -48,6 +48,25 @@ function manipulateDFentryToSol(row, df; dframe = trulyOscData, tspan = shortSpa
     return solve(remake(prob, u0=u0, tspan=(0.0, tspan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=save_idxs, maxiters=200 * tspan, verbose=false) 
 end
 
+function manipulateKA4entryToSol(row, ka4; dframe = trulyOscData, tspan = shortSpan, save_idxs = 1)
+    currow = dframe[row,:]
+    u0[1] = currow[:L]
+    u0[2] = currow[:K]
+    u0[3] = currow[:P]
+    u0[4] = currow[:A]
+    ka1est = currow[:ka1]
+    kb1est = currow[:kb1]
+    ka4est = ka4
+    ka7est = currow[:ka7]
+    psym = [:ka1 => ka1est, :kb1 => kb1est, :kcat1 => Km1exp * ka1est - kb1est, :ka2 => ka2exp, :kb2 => kb2exp,
+                            :ka3 => ka3exp, :kb3 => kb3exp, :ka4 => ka4est, :kb4 => Kd4exp * ka4est, :ka7 => ka7est, 
+                            :kb7 => Km7exp * ka7est - kcat7exp, :kcat7exp => 85.3, :y => 10000]
+    p = [x[2] for x in psym]
+    return solve(remake(prob, u0=u0, tspan=(0.0, tspan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=save_idxs, maxiters=200 * tspan, verbose=false)
+end
+
+
+
 """
 Calculate the minimum df at which oscillations for a given oscillatory parameter set.
 """
