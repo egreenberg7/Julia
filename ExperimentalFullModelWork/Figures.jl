@@ -61,12 +61,12 @@ using LaTeXStrings
         plt
 end
 
-function solutionsGroupedBySpecies(row; df = oscdata, tspan = 600)
+function solutionsGroupedBySpecies(row; df = oscdata, tspan = 600, xlims = (0, tspan), title="Example Oscillator")
     speciesIndices = Dict([:L => 1, :K => 2, :P => 3, :A => 4, :Lp => 5, :LpA => 6, :LK => 7, 
         :LpP => 8, :LpAK => 9, :LpAP => 10, :LpAKL => 11, :LpAPLp => 12, :AK => 13, :AP => 14, 
         :AKL => 15, :APLp => 16])
     #L, Lp
-    lipids = [1, 2]
+    lipids = [1, 5]
     #A, LpA
     adaptors = [4, 6]
     kinases = [speciesIndices[i] for i in [:K, :LK, :LpAK, :LpAKL, :AK, :AKL]]
@@ -87,13 +87,136 @@ function solutionsGroupedBySpecies(row; df = oscdata, tspan = 600)
 
     plots = [plot(i[1], labels = i[2]) for i in zip(solutions, speciesLabels)]
     for i in ["ka1", "kb1", "ka4", "ka7", "per"]
-        println(i * ": " * string(oscdata[row, i]))
+        println(i * ": " * string(round(oscdata[row, i], sigdigits=2)))
     end
-    plot(plots..., layout=(2,2), plot_title="Example Oscillator")
+    plot(plots..., layout=(2,2), plot_title=title,
+    xlims = xlims,
+    #xaxis="Time (s)", yaxis="Concentration (μM)", 
+    dpi = 600,
+    xaxis="")
     #, xlims=(100, tspan), ylims=(0,oscdata[:L, row]) 
-end 
+end
 
-function solutionsGroupedBySpeciesManipulateParam(row, symbol, value; df = oscdata, tspan = 600)
+#TODO FINISH THIS
+function gillespieSolutionsGroupedBySpecies(row; df = oscdata, tspan = 600)
+    speciesIndices = Dict([:L => 1, :K => 2, :P => 3, :A => 4, :Lp => 5, :LpA => 6, :LK => 7, 
+        :LpP => 8, :LpAK => 9, :LpAP => 10, :LpAKL => 11, :LpAPLp => 12, :AK => 13, :AP => 14, 
+        :AKL => 15, :APLp => 16])
+    #L, Lp
+    lipids = [1, 2]
+    #A, LpA
+    adaptors = [4, 6]
+    kinases = [speciesIndices[i] for i in [:K, :LK, :LpAK, :LpAKL, :AK, :AKL]]
+    phosphatases = [speciesIndices[i] for i in [:P, :LpP, :LpAP, :LpAPLp, :AP, :APLp]]
+
+    Llabels = ["L" "Lp"]
+    Alabels = ["A" "LpA"]
+    Klabels = ["K" "LK" "LpAK" "LpAKL" "AK" "AKL"]
+    Plabels = ["P" "LpP" "LpAP" "LpAPLp" "AP" "APLp"]
+    
+    speciesLabels = [Llabels, Alabels, Klabels, Plabels]
+
+    speciesTypes = [lipids, adaptors, kinases, phosphatases]
+    solutions = [entryToGillespieSol(oscdata, row; tspan = tspan, save_idxs = i) for i in speciesTypes]
+
+    solutions = [solutions[i] for i in [1,3,2,4]]
+    speciesLabels = [speciesLabels[i] for i in [1,3,2,4]]
+
+    plots = [plot(i[1], labels = i[2]) for i in zip(solutions, speciesLabels)]
+    for i in ["ka1", "kb1", "ka4", "ka7", "per"]
+        println(i * ": " * string(round(oscdata[row, i], sigdigits=2)))
+    end
+    plot(plots..., layout=(2,2), plot_title="Example Oscillator",
+    #xaxis="Time (s)", yaxis="Concentration (μM)", 
+    dpi = 600,
+    xaxis="")
+    #, xlims=(100, tspan), ylims=(0,oscdata[:L, row]) 
+end
+
+for i in 1:size(oscdata)[1]
+    if i % 20 == 0
+        println(i)
+        display(title!(xlims!(solutionsGroupedBySpecies(i), (400,450)), "Oscillator $i"))
+    end
+end
+
+exampleSolution = solutionsGroupedBySpecies(15)
+savefig(exampleSolution, "ExperimentalFullModelWork/graphStorage/exampleSolutionRow15.png")
+
+exampleSolution700 = solutionsGroupedBySpecies(700, title="Example Oscillator 2")
+savefig(exampleSolution700, "ExperimentalFullModelWork/graphStorage/exampleSolution700.png")
+xlims!(exampleSolution700, (400, 420))
+ylims!(exampleSolution700[3],(0,0.025))
+ylims!(exampleSolution700[2],(0,0.5))
+savefig(exampleSolution700, "ExperimentalFullModelWork/graphStorage/exampleSolutionZoomedIn700")
+
+#Fraction of Adaptor protein in LpAKL
+begin
+    LpAKLOverAtot = zeros(size(oscdata)[1])
+    for i in 1:size(oscdata)[1]
+        #Solve for LpAKL
+        sol = entryToSol(oscdata, i; tspan = 600, save_idxs = 11)
+        #Get from 100 to 600 seconds, inclusive
+        intervalOfInterest = sol.u[1001:end]
+        LpAKLOverAtot[i] = mean(intervalOfInterest) / oscdata[i, :A]
+    end
+
+    mean(LpAKLOverAtot) #0.848
+    std(LpAKLOverAtot) #0.0857
+    histogram(LpAKLOverAtot, normalize=:probability, 
+                xaxis = "Average Fraction of AP2 in LpAKL from 100-600 s",
+                yaxis = "Fraction of Oscillatory Solutions",
+                title = "Fraction of AP2 in LpAKL",
+                legend=:none,
+                dpi = 600)
+    savefig("FractionOfAInLpAKL.png")
+end
+
+#K in LpAKL fraction
+begin
+    LpAKLOverKtot = zeros(size(oscdata)[1])
+    for i in 1:size(oscdata)[1]
+        #Solve for LpAKL
+        sol = entryToSol(oscdata, i; tspan = 600, save_idxs = 11)
+        #Get from 100 to 600 seconds, inclusive
+        intervalOfInterest = sol.u[1001:end]
+        LpAKLOverKtot[i] = mean(intervalOfInterest) / oscdata[i, :K]
+    end
+
+    mean(LpAKLOverKtot) #0.579
+    std(LpAKLOverKtot) #0.123
+    histogram(LpAKLOverKtot, normalize=:probability, 
+                xaxis = "Average Fraction of K in LpAKL from 100-600 s",
+                yaxis = "Fraction of Oscillatory Solutions",
+                title = "Fraction of PIP5K in LpAKL",
+                legend=:none,
+                dpi = 600)
+    savefig("ExperimentalFullModelWork/graphStorage/FractionOfKInLpAKL.png")
+end
+
+#P in LpAPLp fraction
+begin
+    LpAPLpOverPtot = zeros(size(oscdata)[1])
+    for i in 1:size(oscdata)[1]
+        #Solve for LpAPLp
+        sol = entryToSol(oscdata, i; tspan = 600, save_idxs = 12)
+        #Get from 100 to 600 seconds, inclusive
+        intervalOfInterest = sol.u[1001:end]
+        LpAPLpOverPtot[i] = mean(intervalOfInterest) / oscdata[i, :P]
+    end
+
+    mean(LpAPLpOverPtot) #0.252
+    std(LpAPLpOverPtot) #0.117
+    histogram(LpAPLpOverPtot, normalize=:probability, 
+                xaxis = "Average Fraction of P in LpAPLp from 100-600 s",
+                yaxis = "Fraction of Oscillatory Solutions",
+                title = "Fraction of Synaptojanin in LpAPLp",
+                legend=:none,
+                dpi = 600)
+    savefig("ExperimentalFullModelWork/graphStorage/FractionOfPInLpAPLp.png")
+end
+
+function solutionsGroupedBySpeciesManipulateParam(row, symbol, value; df = oscdata, tspan = 600, title = "Example Oscillator")
     speciesIndices = Dict([:L => 1, :K => 2, :P => 3, :A => 4, :Lp => 5, :LpA => 6, :LK => 7, 
             :LpP => 8, :LpAK => 9, :LpAP => 10, :LpAKL => 11, :LpAPLp => 12, :AK => 13, :AP => 14, 
             :AKL => 15, :APLp => 16])
@@ -118,13 +241,21 @@ function solutionsGroupedBySpeciesManipulateParam(row, symbol, value; df = oscda
     speciesLabels = [speciesLabels[i] for i in [1,3,2,4]]
 
     plots = [plot(i[1], labels = i[2]) for i in zip(solutions, speciesLabels)]
-    for i in ["ka1", "kb1", "ka4", "ka7", "per"]
+    for i in ["ka1", "kb1", "ka4", "ka7"]
         println(i * ": " * string(oscdata[row, i]))
     end
-    plot(plots..., layout=(2,2), plot_title="Example Oscillator")
+    plot(plots..., layout=(2,2), plot_title=title, xaxis="")
     #, xlims=(100, tspan), ylims=(0,oscdata[:L, row]) 
-end  
+end 
 
+for i in 0:3
+    ka4temp = 0.01 / (2.0^i)
+    plt = solutionsGroupedBySpeciesManipulateParam(700, :ka4, ka4temp; 
+        tspan = 800, title="Example Oscillator 2: ka4=$(round(ka4temp, sigdigits=3))")
+    xlims!(plt, (600,800))
+    display(plt)
+    savefig(plt, "ExperimentalFullModelWork/graphStorage/example700ka4Version$i.png")
+end
 #Code to create zoomed in graph of oscillatory rate constants
 begin 
     plt = Plots.plot(legendtitle="ka4 (μM/s)", 
@@ -401,7 +532,7 @@ end
             linewidth = 3,
             linestyle=:dash,
             dpi=600)
-        plot!([],[],ms=0,color="white",label=L"PIP5K = %$constantMultiplier * Synaptojanin^{%$exponent}")
+        plot!([],[],ms=0,color="white",label=L"PIP2 = %$constantMultiplier * PIP5K^{%$exponent}")
         plot!([],[],ms=0,color="white",label=L"r^2 = %$correlation")
         savefig("ExperimentalFullModelWork/graphStorage/LVsKWithFit.png")
         savefig(residualPlot, "ExperimentalFullModelWork/graphStorage/LVsKResidualPlot.png")
@@ -508,6 +639,7 @@ savefig(x, "ExperimentalFullModelWork/graphStorage/OscillatoryConcentrations.png
 
     #Miscelanneous statistical plots
     scatter(log10.((oscdata.ka1 .* Km1exp .- oscdata.kb1)),(oscdata.L))
+    histogram(oscdata.ka1 .* Km1exp .- oscdata.kb1)
     scatter((oscdata.K), (oscdata.P))
 
     @df oscdata scatter(:ka1, :ka4)
