@@ -8,9 +8,9 @@ using LaTeXStrings
     #oscdata = DataFrame(CSV.File("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/MaybeOscValuesAnalysis/AllExpOsc.csv"))
     oscdata = CSV.read("/Users/ezragreenberg/Documents/GitHub/Julia/ExperimentalFullModelWork/paramsWithMinDF.csv", DataFrame)
 
-    # cd("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/NoNegRunResultsCSVs")
-    # alldata = getAllCSVs()
-    # cd("../..")
+     cd("/Users/ezragreenberg/JLab/Julia/ExperimentalFullModelWork/NoNegRunResultsCSVs")
+     alldata = getAllCSVs()
+     cd("/Users/ezragreenberg/Documents/GitHub/Julia/")
 
     oscParams = unique(oscdata[:, [:ka1, :ka4, :ka7, :kb1]])
     allParams = unique(removeBadValues(alldata)[:, [:ka1, :ka4, :ka7, :kb1]])
@@ -244,21 +244,39 @@ function solutionsGroupedBySpeciesManipulateParam(row, symbol, value; df = oscda
     for i in ["ka1", "kb1", "ka4", "ka7"]
         println(i * ": " * string(oscdata[row, i]))
     end
-    plot(plots..., layout=(2,2), plot_title=title, xaxis="")
+    plot(plots..., layout=(2,2), plot_title=title, xaxis="", dpi = 600)
     #, xlims=(100, tspan), ylims=(0,oscdata[:L, row]) 
 end 
 
+#Code to make series of plots showing that period decreases with ka4
 for i in 0:3
     ka4temp = 0.01 / (2.0^i)
     plt = solutionsGroupedBySpeciesManipulateParam(700, :ka4, ka4temp; 
-        tspan = 800, title="Example Oscillator 2: ka4=$(round(ka4temp, sigdigits=3))")
+        tspan = 800, title="")#"Example Oscillator 2: \n ka4=$(1000*round(ka4temp, sigdigits=3))̇̇̇̇*10⁻³")
     xlims!(plt, (600,800))
     display(plt)
     savefig(plt, "ExperimentalFullModelWork/graphStorage/example700ka4Version$i.png")
 end
+
+#Code to make series of plots showing that period decreases with P increasing
+for i in 0:5
+    P0 = oscdata[700, :P]
+    Ptemp = P0 - i * 0.002
+    sol1 = entryToSolManipulateValue(oscdata, 700, :P, Ptemp)
+    per = string(round(getPerAmp(sol1,findmaxima(sol1.u[2000:end], 10)[1], findmaxima(sol1.u, 10)[2])[1], sigdigits=3))
+    println("Per$i: " * per)
+    plt = solutionsGroupedBySpeciesManipulateParam(700, :P, Ptemp; 
+        tspan = 800, title="Example Oscillator 2: P=$(round(Ptemp,sigdigits=3)) μM")
+    xlims!(plt, (600,650))
+    display(plt)
+    savefig(plt, "ExperimentalFullModelWork/graphStorage/example700PVersion$i.png")
+end
+
+
+
 #Code to create zoomed in graph of oscillatory rate constants
 begin 
-    plt = Plots.plot(legendtitle="ka4 (μM/s)", 
+    plt = Plots.plot(legendtitle="ka4 (μM⁻¹s⁻¹)", 
         title="Dimensionality Factor = 10,000",
         legend=:outerright, dpi = 300,
         formatter=x->"10^{$(round(x, digits=1))}")
@@ -277,9 +295,9 @@ begin
         zlims!(plt, zbounds)
     end
 
-    xlabel!(plt, "ka1 (μM/s)")
-    ylabel!(plt, "kb1 (μM/s)")
-    zlabel!(plt, "ka7 (μM/s)")
+    xlabel!(plt, "ka1 (μM⁻¹s⁻¹)")
+    ylabel!(plt, "kb1 (s⁻¹)")
+    zlabel!(plt, "ka7 (μM⁻¹s⁻¹)")
     title!(plt, "Oscillatory Parameters:\n Dimensionality Factor = 10,000")
     plt
     Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/trulyOscillatoryParams.png")
@@ -287,7 +305,7 @@ end
 
 #Code to create zoomed out graph of oscillatory params
 begin
-    plt = Plots.plot(legendtitle="ka4 (μM/s)", 
+    plt = Plots.plot(legendtitle="ka4 (μM⁻¹s⁻¹)", 
         title="Dimensionality Factor = 10,000",
         legend=:outerright, dpi = 300,
         formatter=x->"10^{$(round(x, digits=1))}",
@@ -312,9 +330,9 @@ begin
         zlims!(plt, zbounds)
     end
 
-    xlabel!(plt, "ka1 (μM/s)")
-    ylabel!(plt, "kb1 (μM/s)")
-    zlabel!(plt, "ka7 (μM/s)")
+    xlabel!(plt, "ka1 (μM⁻¹s⁻¹)")
+    ylabel!(plt, "kb1 (s⁻¹)")
+    zlabel!(plt, "ka7 (μM⁻¹s⁻¹)")
     title!(plt, "Oscillatory Parameters:\n Dimensionality Factor = 10,000")
     plt
     Plots.savefig(plt, "ExperimentalFullModelWork/graphStorage/trulyOscillatoryParamsOut.png")
@@ -328,13 +346,13 @@ end
             xlims=(log10(kaRange[1]), log10(kaRange[end])), 
             ylims = (log10(kbRange[1]), log10(kbRange[end])), 
             zlims = (log10(ka7Range[1]), log10(ka7Range[end])), 
-            legendtitle="ka4 (μM/s)", 
+            legendtitle="ka4 (μM⁻¹s⁻¹)", 
             label=:none,
             legend=:topright,
             title = "Parameter Search Space: \n Dimensionality Factor = [0.1, 10,000]",
-            xlabel = "ka1 (μM/s)",
-            ylabel = "kb1 (μM/s)",
-            zlabel = "ka7 (μM/s)",
+            xlabel = "ka1 (μM⁻¹s⁻¹)",
+            ylabel = "kb1 (s⁻¹)",
+            zlabel = "ka7 (μM⁻¹s⁻¹)",
             xtickfontsize = 6,
             ytickfontsize = 6,
             ztickfontsize = 6,
