@@ -4,6 +4,7 @@ using CSV
 using Interact
 using FFTW
 using LaTeXStrings
+include("../UTILITIES/GillespieConverter.jl")
 include("NoNegConstants.jl")
 include("EvaluationFunctions.jl")
 
@@ -32,6 +33,29 @@ function entryToSol(df, row; tspan = shortSpan, save_idxs = 1)
     return solve(remake(prob, u0=u0, tspan=(0.0, tspan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=save_idxs, maxiters=200 * tspan, verbose=false, callback=TerminateSteadyState(1e-8, 1e-12))
 end
 
+#TODO Figure out what to return
+function entryToGillespieSol(df, row; tspan = shortSpan, save_idxs = 1, volume = 0.5)
+    currow = df[row,:]
+        u0[1] = currow[:L]
+        u0[2] = currow[:K]
+        u0[3] = currow[:P]
+        u0[4] = currow[:A]
+        ka1est = currow[:ka1]
+        kb1est = currow[:kb1]
+        ka4est = currow[:ka4]
+        ka7est = currow[:ka7]
+        dfest = currow[:df]
+    psym = [:ka1 => ka1est, :kb1 => kb1est, :kcat1 => Km1exp * ka1est - kb1est, :ka2 => ka2exp, :kb2 => kb2exp,
+                :ka3 => ka3exp, :kb3 => kb3exp, :ka4 => ka4est, :kb4 => Kd4exp * ka4est, :ka7 => ka7est, 
+                :kb7 => Km7exp * ka7est - kcat7exp, :kcat7exp => 85.3, :y => dfest]
+    p = [x[2] for x in psym]
+    jumpU0 = GillespieConverter.convertU0(u0, volume)
+    jumpP = GillespieConverter.convertP(p, volume)
+    jumpProb = GillespieConverter.getJumpProb(fullrn, jumpU0, jumpP, (0.0, 600.0))
+    return jumpSol = solve(jumpProb, SSAStepper(), saveat=0.1, save_idxs=save_idxs)
+    GillespieConcSol = [j[1] for j in jumpSol.u] ./ (GillespieConverter.Nₐ * volume * 1e-21)
+end
+
 """
 Converts row in dataframe of oscillatory concentrations for a given p 
 into a solution.
@@ -46,6 +70,53 @@ function entryToSol(df, row, p; tspan = shortSpan)
     u0[3] = currow[:P]
     u0[4] = currow[:A] 
     return solve(remake(prob, u0=u0, tspan=(0.0, tspan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=1, maxiters=200 * tspan, verbose=false, callback=TerminateSteadyState(1e-8, 1e-12))
+end
+
+"""
+Converts row in oscillatory solution dataframe to an ODESolution while allowing you to change
+    the value of one param
+- `df` Dataframe of oscillatory solutions
+- `row` Row of dataframe to solve
+- `symbol` Parameter/initial concentration to change value of
+- `newValue` New value of parameter being changed
+"""
+function entryToSolManipulateValue(df, row, symbol, newValue; tspan = longSpan, save_idxs = 1)
+    currow = df[row,:]
+    u0[1] = currow[:L]
+    u0[2] = currow[:K]
+    u0[3] = currow[:P]
+    u0[4] = currow[:A]
+    ka1est = currow[:ka1]
+    kb1est = currow[:kb1]
+    ka4est = currow[:ka4]
+    ka7est = currow[:ka7]
+    dfest = currow[:df]
+
+    if symbol == :df
+        dfest = newValue
+    elseif symbol == :ka1
+        ka1est = newValue
+    elseif symbol == :kb1
+        kb1est = newValue
+    elseif symbol == :ka4
+        ka4est = newValue
+    elseif symbol == :ka7
+        ka7est = newValue
+    elseif symbol == :L
+        u0[1] = newValue
+    elseif symbol == :K 
+        u0[2] = newValue 
+    elseif symbol == :P 
+        u0[3] = newValue
+    elseif symbol == :A 
+        u0[4] = newValue
+    end
+
+    psym = [:ka1 => ka1est, :kb1 => kb1est, :kcat1 => Km1exp * ka1est - kb1est, :ka2 => ka2exp, :kb2 => kb2exp,
+                            :ka3 => ka3exp, :kb3 => kb3exp, :ka4 => ka4est, :kb4 => Kd4exp * ka4est, :ka7 => ka7est, 
+                            :kb7 => Km7exp * ka7est - kcat7exp, :kcat7exp => 85.3, :y => dfest]
+    p = [x[2] for x in psym]
+    return solve(remake(prob, u0=u0, tspan=(0.0, tspan), p=p), Rodas4(), abstol=1e-8, reltol=1e-12, saveat=0.1, save_idxs=save_idxs, maxiters=200 * tspan, verbose=false)
 end
 
 """
@@ -232,6 +303,7 @@ function removeBadValues(mydf; minka7 = (kcat7exp / Km7exp), Km1 = Km1exp)
     newdf = newdf[emptyrowremoval, :]
     return newdf
 end
+
 """
 Get dataframe holding only the values with at least minOscSols oscillatory
 solutions found
