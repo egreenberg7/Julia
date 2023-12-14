@@ -2,9 +2,6 @@ include("ReactionUtilities.jl")
 using .SimpleReactions
 using .FullReaction
 using DifferentialEquations
-include("CustomPeakFinder.jl")
-include("Evaluator.jl")
-using .Evaluator
 using Plots
 include("/Users/ezragreenberg/Documents/GitHub/Julia/ExperimentalFullModelWork/EvaluationFunctions.jl")
 
@@ -18,16 +15,16 @@ const fullProb = makeProblem(fullRxn, FullReaction)
 
 
 """
-    testReaction(prob, m, repetitions=100,tspan=600)
-    Solves the reaction system over repetition times
-    #Arguments
-    - `prob` ODEProblem to solve
-    - `m` module from which to draw parameter generators
+    testReaction(prob, m; repetitions=100000,tspan=600)
+Solves the reaction system over repetition times
+#Arguments
+- `prob` ODEProblem to solve
+- `m` module from which to draw parameter generators
 """
 function testReaction(problem, m; repetitions=100000, tspan=600)
     for i in 1:repetitions
         p = m.randomP()
-        p[end] = 10000  
+        #p[end] = 10000  
         u = m.randomU()
         prob = remake(problem, u0=u, p=p, save_idxs=1)
         sol = solve(prob)
