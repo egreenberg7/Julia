@@ -579,6 +579,26 @@ end
         savefig("ExperimentalFullModelWork/graphStorage/PerVska4.png")
     end
 
+    regLine = lm(@formula(log10(per)~log10(P)), oscdata)
+    constantMultiplier = round(10^coef(regLine)[1],digits=3)
+    exponent = round(coef(regLine)[2], digits = 3)
+    correlation = round(r2(regLine), digits = 3)
+    residualPlot=scatter(log10.(oscdata.ka4), predict(regLine, oscdata).-log10.(oscdata.per),ylims=(-0.4,0.4))
+    scatter(log10.(oscdata.per), log10.(oscdata.P), 
+        xaxis="Rate Constant for Binding of Synaptojanin to AP2 1/(μM*̇s)", yaxis="Period (s)", smooth = true,
+        formatter=x->"10^{$(round(x,digits=2))}",
+        label=:none,
+        linecolor=:black,
+        mc=:blue,
+        legendfontsize=10,
+        title="Period vs Binding Rate of Phosphatase to Adaptor",
+        linewidth = 3,
+        linestyle=:dash,
+        dpi = 600)
+    plot!([],[],ms=0,color="white",label=L"Period = %$constantMultiplier * k_{on}^{%$exponent}")
+    plot!([],[],ms=0,color="white",label=L"r^2 = %$correlation")
+    savefig("ExperimentalFullModelWork/graphStorage/PerVska4.png")
+
 #Code to plot multiple solutions while manipulating ka4
 
 
