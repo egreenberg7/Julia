@@ -88,6 +88,40 @@ module SimpleReactions
     end
 end
 
+"Reactinos without membrane localization"
+module NoMembraneReactions
+    using Catalyst
+    using DifferentialEquations
+    using .Main.ReactionConstants
+    export simplePRxn, simpleKRxn, randomP, randomU
+
+    """
+    React with neither kinase nor phosphatase able to bind to the membrane.
+    """
+    const noMembraneReactions = @reaction_network simplePRxn begin
+        @parameters ka1 kb1 kcat1 ka2 kb2 ka3 kb3 ka7 kb7 kcat7 df
+        @species L(t) K(t) P(t) Lp(t) LK(t) LpP(t)
+        # ALIASES: L = PIP, Lp = PIP2, K = Kinase (PIP5K), P = Phosphatase (Synaptojanin), A = AP2 
+        # reactions between the same binding interfaces will have the same rate constant no matter the dimensionality or complex
+        (ka1,kb1), L + K <--> LK # L binding to kinase
+        kcat1, LK --> Lp + K # L phosphorylation by kinase into Lp
+        (ka7,kb7), Lp + P <--> LpP # Lp binding to phosphatase
+        kcat7, LpP --> L + P # L dephosphorylation by phosphatase
+    end
+
+end
+
+"Toy reactions for testing"
+module ToyReactions
+    using Catalyst
+    const enzymeReaction = @reaction_network enzymeReaction begin
+        @parameters ka kb kcat
+        @species S(t) E(t) ES(t) P(t)
+        (ka, kb), S + E <--> ES
+        kcat, ES --> P
+    end
+end
+
 "Module with full reaction and random concentration and parameter generators"
 module FullReaction
     using Catalyst
